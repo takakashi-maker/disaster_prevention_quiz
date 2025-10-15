@@ -246,7 +246,8 @@ body {
     text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
 }
 .btn-answer-ox {
-  padding: 2rem 3rem;
+  /* 修正: パディングを調整し、大きさを適正化 */
+  padding: 1.5rem 2.5rem;
   font-size: 2rem;
   color: white;
   box-shadow: 0 6px 15px rgba(0,0,0,0.2);
@@ -429,7 +430,7 @@ body {
     border: 3px solid var(--main-color);
 }
 
-/* ★★★ 秋テーマの文字色調整 (コントラスト強化) ★★★ */
+/* ★★★ 秋テーマの文字色調整 (コントラスト再強化: 白い影を追加) ★★★ */
 .theme-autumn #content-area {
     color: var(--text-color); /* #58331d */
 }
@@ -437,17 +438,22 @@ body {
     color: #58331d;
 }
 .theme-autumn .question-text {
-    color: #1e110a; /* 濃い焦げ茶色に */
-    text-shadow: none;
+    color: #1e110a; /* 濃い焦げ茶色 */
+    /* 修正: 白い影を追加して背景から浮かせる */
+    text-shadow: 1px 1px 1px #fff, -1px -1px 1px #fff; 
 }
 .theme-autumn .prompt-text {
-    color: #1e110a; /* 濃い焦げ茶色に */
+    color: #1e110a; /* 濃い焦げ茶色 */
     font-weight: 700;
+    /* 修正: 白い影を追加して背景から浮かせる */
+    text-shadow: 1px 1px 1px #fff, -1px -1px 1px #fff;
 }
 /* 解答ページ理由テキスト */
 .theme-autumn .reason-text {
-    color: #1e110a; /* 濃い焦げ茶色に */
+    color: #1e110a; /* 濃い焦げ茶色 */
     font-weight: 600; 
+    /* 修正: 白い影を追加して背景から浮かせる */
+    text-shadow: 1px 1px 1px #fff, -1px -1px 1px #fff; 
 }
 
 
