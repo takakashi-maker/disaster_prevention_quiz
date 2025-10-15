@@ -1,11 +1,55 @@
 /* style.css */
 
+/* テーマ変数の定義 */
+:root {
+  /* ◆ 通常テーマ (デフォルト) */
+  --bg-gradient-start: #f0f4f8;
+  --bg-gradient-end: #c5d6e6;
+  --main-color: #4A90E2; /* 青 */
+  --accent-color: #7AC1FF;
+  --text-color: #111827;
+  --box-shadow-main: 0 15px 45px rgba(0,0,0,0.15), 0 0 15px rgba(74, 144, 226, 0.2);
+  --btn-learn-start: #ff9933; /* 学習モードボタンの基本色 */
+  --btn-learn-end: #ffc61a;
+  --btn-back-bg: #e5e7eb;
+  --btn-back-color: #111827;
+}
+
+/* ◆ 秋テーマ */
+.theme-autumn {
+  --bg-gradient-start: #fbf7f0;
+  --bg-gradient-end: #e6c5a3;
+  --main-color: #e88d13; /* オレンジブラウン */
+  --accent-color: #ffb74d;
+  --text-color: #58331d;
+  --box-shadow-main: 0 15px 45px rgba(0,0,0,0.15), 0 0 15px rgba(232, 141, 19, 0.2);
+  --btn-learn-start: #6b8e23; /* オリーブグリーン */
+  --btn-learn-end: #a4c639;
+  --btn-back-bg: #d4e3b7;
+  --btn-back-color: #58331d;
+}
+
+/* ◆ ハロウィンテーマ */
+.theme-halloween {
+  --bg-gradient-start: #301934;
+  --bg-gradient-end: #1a081c;
+  --main-color: #ff6600; /* ハロウィンオレンジ */
+  --accent-color: #ff9933;
+  --text-color: #fce4ec; /* 明るいテキスト */
+  --box-shadow-main: 0 15px 45px rgba(255,102,0,0.15), 0 0 15px rgba(255, 102, 0, 0.3);
+  --btn-learn-start: #800080; /* パープル */
+  --btn-learn-end: #cc00cc;
+  --btn-back-bg: #4a148c;
+  --btn-back-color: #fce4ec;
+}
+
 /* 全体のリセットと基本スタイル */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-  background: linear-gradient(135deg, #f0f4f8 0%, #c5d6e6 100%);
-  color: #111827;
+  /* ★変数適用 */
+  background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+  color: var(--text-color);
   user-select: none;
   -webkit-user-select: none;
   overflow-x: hidden;
@@ -26,8 +70,9 @@ body {
   max-width: 1200px;
   background: #ffffff;
   border-radius: 1.5rem;
-  box-shadow: 0 15px 45px rgba(0,0,0,0.15), 0 0 15px rgba(74, 144, 226, 0.2);
-  border: 3px solid #4A90E2;
+  /* ★変数適用 */
+  box-shadow: var(--box-shadow-main);
+  border: 3px solid var(--main-color);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -39,14 +84,33 @@ body {
 /* メインコンテンツエリアを独立させ、スクロールを担当させる */
 #content-area {
     padding: 3rem; 
-    /* 固定ボタンの高さ(100px)と余白を足して、厳密に底部パディングを確保 */
     padding-bottom: 120px; 
-    overflow-y: auto; /* ここだけスクロール可能 */
+    overflow-y: auto; 
     overflow-x: hidden;
     text-align: center;
     flex-grow: 1; 
     min-height: 350px; 
+    /* デフォルトの文字色 */
+    color: var(--text-color);
 }
+
+/* ★設定ボタンエリア (位置修正) */
+.setting-buttons-area {
+    position: absolute; /* .contentに対して絶対位置 */
+    top: 20px;
+    right: 20px;
+    z-index: 30; /* 最前面に表示 */
+    display: flex;
+    gap: 10px; 
+    justify-content: flex-end;
+}
+.setting-buttons-area .btn {
+    font-size: 1.2rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    height: auto;
+}
+
 
 .fade-container {
   transition: opacity 0.3s ease;
@@ -57,7 +121,6 @@ body {
   opacity: 0;
 }
 
-/* ★修正点: 画像コンテナの高さを固定 */
 .image-container {
   width: 350px;
   height: 350px;
@@ -68,6 +131,7 @@ body {
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   border: 5px solid #fff;
 }
+
 .quiz-image {
     width: 100%;
     height: 100%;
@@ -75,14 +139,12 @@ body {
     display: block;
 }
 
-/* ★新規追加: 解答ページで画像の高さを補填するラッパー */
 .answer-padding-top {
-    /* 画像の高さ(350px) + margin-bottom(2.5rem=約40px) に対応する高さを確保 */
     height: 390px; 
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column; /* シンボルを中央に寄せるため */
+    flex-direction: column; 
 }
 
 @keyframes float {
@@ -93,7 +155,7 @@ body {
   font-size: 2.5rem; 
   font-weight: 900;
   line-height: 1.5; 
-  color: #1f2937;
+  color: #1f2937; /* 通常時の問題文の色 */
   padding: 0 1rem;
   margin-bottom: 1rem; 
   text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
@@ -102,13 +164,13 @@ body {
 .prompt-text {
   font-size: 2rem;
   font-weight: 700;
-  color: #6b7280;
+  color: #6b7280; /* 通常時のプロンプトの色 */
   margin-bottom: 3rem;
 }
 .answer-symbol {
   font-size: 12rem;
   font-weight: 900;
-  margin-bottom: 0; /* ラッパー側で高さを制御するため0に */
+  margin-bottom: 0; 
   animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 @keyframes popIn {
@@ -128,7 +190,7 @@ body {
   font-size: 1.5rem; 
   line-height: 1.8; 
   font-weight: 500;
-  color: #374151;
+  color: #374151; /* ★通常時の解答理由の色 */
   max-width: 900px;
   margin: 0 auto 1.5rem; 
   padding: 0 1rem;
@@ -177,7 +239,8 @@ body {
     text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
 }
 .btn-learn {
-    background: linear-gradient(135deg, #ff9933 0%, #ffc61a 100%);
+    /* ★変数適用 */
+    background: linear-gradient(135deg, var(--btn-learn-start) 0%, var(--btn-learn-end) 100%);
     color: white;
     box-shadow: 0 4px 12px rgba(255, 153, 51, 0.4);
     text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
@@ -191,15 +254,18 @@ body {
 .btn-answer-o { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
 .btn-answer-x { background: linear-gradient(135deg, #ef4444 0%, #f87171 100%); }
 .btn-back {
-  background: #e5e7eb;
-  color: #111827;
+  /* ★変数適用 */
+  background: var(--btn-back-bg);
+  color: var(--btn-back-color);
 }
 .btn-next {
-  background: linear-gradient(135deg, #4A90E2 0%, #7AC1FF 100%);
+  /* ★変数適用 */
+  background: linear-gradient(135deg, var(--main-color) 0%, var(--accent-color) 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.5);
+  box-shadow: 0 4px 12px var(--main-color);
   text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
 }
+
 /* 一時的なアニメーション */
 .animated {
     animation-duration: 1s;
@@ -228,7 +294,8 @@ body {
   top: 0;
   left: 0;
   height: 8px;
-  background: linear-gradient(90deg, #4A90E2 0%, #7AC1FF 50%, #ff9933 100%);
+  /* ★変数適用 */
+  background: linear-gradient(90deg, var(--main-color) 0%, var(--accent-color) 50%, var(--btn-learn-start) 100%);
   transition: width 0.3s ease;
   border-radius: 0 0 8px 0;
   z-index: 20; 
@@ -245,9 +312,10 @@ body {
 .opening-title {
   font-size: 4.5rem;
   font-weight: 900;
-  color: #4A90E2;
+  /* ★変数適用 */
+  color: var(--main-color);
   animation: titleGlow 2s ease-in-out infinite;
-  text-shadow: 0 0 30px rgba(74, 144, 226, 0.3);
+  text-shadow: 0 0 30px rgba(74, 144, 226, 0.3); 
   padding: 0 1rem;
 }
 @keyframes titleGlow {
@@ -289,7 +357,8 @@ body {
 .ending-title {
   font-size: 3.5rem;
   font-weight: 900;
-  color: #4A90E2;
+  /* ★変数適用 */
+  color: var(--main-color);
   animation: fadeInScale 0.8s ease-out;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
 }
@@ -312,9 +381,10 @@ body {
     margin: 1.5rem 0;
 }
 .retry-button {
+  /* ★変数適用 */
   font-size: 1.8rem;
   padding: 1.2rem 2.8rem;
-  background: linear-gradient(135deg, #4A90E2 0%, #7AC1FF 100%);
+  background: linear-gradient(135deg, var(--main-color) 0%, var(--accent-color) 100%);
   color: white;
   box-shadow: 0 8px 25px rgba(74, 144, 226, 0.5);
   animation: fadeInUp 1s ease-out 0.9s both;
@@ -333,7 +403,7 @@ body {
     bottom: 0;
     left: 0;
     padding: 1.5rem 3rem; 
-    height: 100px; /* 高さを固定 */
+    height: 100px; 
     background: #ffffff;
     border-top: 1px solid #e5e7eb;
     z-index: 10;
@@ -343,6 +413,90 @@ body {
     align-items: center;
 }
 
+/* -------------------------------------- */
+/* ◆ テーマ装飾 (背景画像と文字色コントラスト調整) */
+/* -------------------------------------- */
+
+/* 秋テーマの強化 */
+.theme-autumn .content {
+    background: #fbf7f0;
+    background-image: url('images/autumn_bg.png'); 
+    background-size: cover; 
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-blend-mode: multiply; 
+    opacity: 0.98;
+    border: 3px solid var(--main-color);
+}
+
+/* ★★★ 秋テーマの文字色調整 (コントラスト強化) ★★★ */
+.theme-autumn #content-area {
+    color: var(--text-color); /* #58331d */
+}
+.theme-autumn .opening-subtitle {
+    color: #58331d;
+}
+.theme-autumn .question-text {
+    color: #1e110a; /* 濃い焦げ茶色に */
+    text-shadow: none;
+}
+.theme-autumn .prompt-text {
+    color: #1e110a; /* 濃い焦げ茶色に */
+    font-weight: 700;
+}
+/* 解答ページ理由テキスト */
+.theme-autumn .reason-text {
+    color: #1e110a; /* 濃い焦げ茶色に */
+    font-weight: 600; 
+}
+
+
+/* ハロウィンテーマの強化 */
+.theme-halloween .content {
+    background: radial-gradient(circle at 50% 10%, #4a2d05 0%, #1a081c 100%); 
+    background-image: url('images/halloween_bg.png'); 
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-blend-mode: overlay; 
+    opacity: 0.95; 
+    border: 3px solid var(--accent-color); 
+}
+
+/* ハロウィンテーマの文字色調整 (暗い背景に合わせる) */
+.theme-halloween #content-area {
+    color: var(--text-color); /* #fce4ec (明るい色) */
+}
+.theme-halloween .opening-title {
+    color: var(--accent-color);
+    text-shadow: 0 0 15px var(--accent-color), 0 0 30px var(--accent-color);
+}
+.theme-halloween .question-text {
+    color: #fff; /* 問題文を白に変更 */
+    text-shadow: 0 0 10px rgba(255,102,0,0.5); /* 影をつけて目立たせる */
+}
+.theme-halloween .prompt-text,
+.theme-halloween .ending-message {
+    color: #ffcc99; /* 明るいオレンジ */
+}
+.theme-halloween .answer-correct {
+  color: #00ff7f; /* ネオングリーン */
+  text-shadow: 0 0 20px rgba(0, 255, 127, 0.6);
+}
+.theme-halloween .answer-wrong {
+  color: #ff3333; /* 鮮やかな赤 */
+  text-shadow: 0 0 20px rgba(255, 51, 51, 0.6);
+}
+.theme-halloween .opening-subtitle {
+    color: #ffcc99;
+}
+/* 解答ページ理由テキスト */
+.theme-halloween .reason-text {
+    color: #fff; 
+    text-shadow: 0 0 5px rgba(255,102,0,0.7); 
+    font-weight: 500;
+}
+
+
 /* メディアクエリ */
 @media (max-width: 768px) {
   .content { 
@@ -350,25 +504,33 @@ body {
   }
   .fixed-button-area {
       padding: 1rem 1rem;
-      height: 90px; /* モバイルでの固定高さ */
+      height: 90px; 
   }
   #content-area { 
       padding: 2rem 1rem;
-      padding-bottom: 100px; /* モバイルでの固定高さに合わせて調整 */
+      padding-bottom: 100px; 
       min-height: 350px;
       flex-grow: 1;
   }
   
-  /* ★修正点: モバイルでの画像コンテナの高さを固定 */
+  /* ★設定ボタンエリア (モバイルでの調整) */
+  .setting-buttons-area {
+      top: 10px;
+      right: 10px;
+      gap: 5px;
+  }
+  .setting-buttons-area .btn {
+      font-size: 1rem;
+      padding: 0.4rem 0.8rem;
+  }
+
   .image-container { 
       width: 250px; 
       height: 250px; 
       margin-bottom: 1.5rem; 
   }
   
-  /* ★新規追加: モバイルでの画像補填用ラッパーの高さ */
   .answer-padding-top {
-      /* 画像の高さ(250px) + margin-bottom(1.5rem=約24px) */
       height: 274px; 
   }
   

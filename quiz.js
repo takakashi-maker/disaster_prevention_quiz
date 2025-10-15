@@ -9,16 +9,47 @@ let isAnimating = false;
 let score = 0;
 let quizMode = true;
 
-// オーディオコンテキスト（Web Audio API）
+// 🎨 テーマ管理
+const THEMES = ['default', 'autumn', 'halloween'];
+let currentTheme = localStorage.getItem('quizTheme') || THEMES[0];
+let currentThemeIndex = THEMES.indexOf(currentTheme); 
+
+function applyTheme(themeName) {
+    const body = document.body;
+    // 既存のテーマクラスをリセット
+    body.classList.remove('theme-autumn', 'theme-halloween'); 
+
+    if (themeName !== 'default') {
+        body.classList.add(`theme-${themeName}`);
+    }
+    // localStorageに保存
+    localStorage.setItem('quizTheme', themeName);
+    currentTheme = themeName;
+}
+
+function changeTheme() {
+    playClickSound(); // テーマ変更ボタンのクリック音
+    currentThemeIndex = (currentThemeIndex + 1) % THEMES.length;
+    applyTheme(THEMES[currentThemeIndex]);
+    
+    if (currentPhase === 'opening') {
+        render(); // オープニング画面を更新
+    }
+}
+// 初期化時にテーマを適用
+applyTheme(currentTheme); 
+
+
+// ----------------------------------------------------
+// 🔊 Audio API の定義 (効果音ON/OFF機能は削除し、常に再生)
+// ----------------------------------------------------
 let audioContext = null;
 function initAudio() {
   if (!audioContext) {
-    // ユーザー操作 (クリック) があったときにAudioContextを初期化
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
   }
 }
 
-// 正解音 (省略)
 function playCorrectSound() {
   initAudio();
   const osc = audioContext.createOscillator();
@@ -37,7 +68,6 @@ function playCorrectSound() {
   osc.stop(audioContext.currentTime + 0.25);
 }
 
-// 不正解音 (省略)
 function playWrongSound() {
   initAudio();
   const osc = audioContext.createOscillator();
@@ -53,8 +83,7 @@ function playWrongSound() {
   osc.stop(audioContext.currentTime + 0.3);
 }
 
-// ボタンクリック音 (省略)
-function playClickSound() {
+function playClickSound() { 
   initAudio();
   const osc = audioContext.createOscillator();
   const gain = audioContext.createGain();
@@ -67,8 +96,8 @@ function playClickSound() {
   osc.start(audioContext.currentTime);
   osc.stop(audioContext.currentTime + 0.1);
 }
+// ----------------------------------------------------
 
-// プログレスバー更新 (省略)
 function updateProgress() {
   const progressBar = document.getElementById('progress-bar');
   const progress = ((currentIndex) / QUESTIONS.length) * 100;
@@ -78,7 +107,6 @@ function updateProgress() {
   }
 }
 
-// アニメーションを一時的に付与する関数 (省略)
 function applyAnimation(elementId, animationClass) {
     const element = document.getElementById(elementId);
     if (element && animationClass) {
@@ -91,13 +119,13 @@ function applyAnimation(elementId, animationClass) {
     }
 }
 
-// ボタンのレンダリング関数 (省略)
 function renderButtons(html) {
     const fixedButtonArea = document.querySelector('.fixed-button-area');
     if (fixedButtonArea) {
         fixedButtonArea.innerHTML = html;
     }
 }
+
 
 // レンダリング関数
 function render() {
@@ -107,16 +135,34 @@ function render() {
   let mainHtml = '<div class="fade-container' + (isAnimating ? ' fade-out' : '') + '">';
   let buttonHtml = '';
 
+  // ----------------------------------------------------
+  // ★ 画像パスの動的決定
+  // ----------------------------------------------------
+  const themePrefix = currentTheme === 'default' ? '' : `${currentTheme}_`;
+  const openingImage = `images/${themePrefix}opening.png`;
+  const endingImage = `images/${themePrefix}ending.png`;
+  // ----------------------------------------------------
+
   if (currentPhase === 'opening') {
+    const currentThemeDisplay = currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1);
+    
+    // 設定ボタンエリアをテーマ変更ボタンのみに修正
     mainHtml += `
+      <div class="setting-buttons-area">
+          <button class="btn btn-back" onclick="changeTheme()">
+              🎨 テーマ変更 (${currentThemeDisplay})
+          </button>
+      </div>
+
       <div class="opening-screen">
         <div class="image-container" style="animation: none;">
-            <img src="images/opening.png" alt="オープニング画像" class="quiz-image">
+            <img src="${openingImage}" alt="オープニング画像" class="quiz-image">
         </div>
         <div class="opening-title">防災○×クイズ</div>
         <div class="opening-subtitle">全${QUESTIONS.length}問で防災の知識をチェック！</div>
       </div>
     `;
+    
     buttonHtml = `
       <div class="start-button-group">
           <button class="start-button btn-quiz" onclick="startQuiz(true)">1. クイズモード (○×で回答) →</button>
@@ -130,7 +176,7 @@ function render() {
     mainHtml += `
       <div class="ending-screen">
         <div class="image-container" style="animation: none;">
-            <img src="images/ending.png" alt="エンディング画像" class="quiz-image">
+            <img src="${endingImage}" alt="エンディング画像" class="quiz-image">
         </div>
         <div class="ending-title">${endingTitle}</div>
         ${scoreMessage}
@@ -150,7 +196,7 @@ function render() {
         <img src="${q.image}" alt="問題${currentIndex + 1}の画像" class="quiz-image">
       </div>
       <div class="question-text">${q.q}</div>
-      <div class="prompt-text">${quizMode ? '答えを選んでください (O/XまたはM/Bキーでも回答可)' : '○ か × か (Enter/→キーで答えを見る)'}</div>
+      <div class="prompt-text">${quizMode ? '答えを選んでください (O/XキーまたはEnter/Spaceキーでも回答可)' : '○ か × か (Enter/→キーで答えを見る)'}</div>
     `;
     
     buttonHtml = `
@@ -161,7 +207,7 @@ function render() {
             <button class="btn btn-answer-ox btn-answer-o" onclick="submitAnswer(true)">○ (まる)</button>
             <button class="btn btn-answer-ox btn-answer-x" onclick="submitAnswer(false)">× (ばつ)</button>
         ` : `
-            <button class="btn btn-learn" onclick="showAnswer()">答えを見る ✨</button>
+            <button class="btn btn-learn" onclick="showAnswer()">Enter. 答えを見る ✨</button>
         `}
       </div>
     `;
@@ -176,7 +222,6 @@ function render() {
     const showNext = currentIndex < QUESTIONS.length - 1;
     const questionNumber = `問題 ${currentIndex + 1} / ${QUESTIONS.length}`;
 
-    // 解答ページ
     mainHtml += `
       <div style="font-size: 1.5rem; color: #4A90E2; font-weight: 700; margin-bottom: 1.5rem;">🔹 ${questionNumber} 🔹</div>
       
@@ -193,14 +238,6 @@ function render() {
         ${showNext ? '<button class="btn btn-next" onclick="nextQuestion()">→ 次の問題 (Enter)</button>' : '<button class="btn btn-next" onclick="showEnding()">🎉 結果を見る (Enter)</button>'}
       </div>
     `;
-    
-    if (!quizMode) {
-         if (q.answer) {
-          playCorrectSound();
-        } else {
-          playWrongSound();
-        }
-    }
   }
 
   mainHtml += '</div>';
@@ -300,7 +337,7 @@ function previousQuestion() {
   }
 }
 
-// キーボードイベントの調整 (省略)
+// キーボードイベントの調整 (操作性向上)
 document.addEventListener('keydown', (e) => {
     if (e.key === ' ' && currentPhase !== 'answer') {
         e.preventDefault();
@@ -321,7 +358,8 @@ document.addEventListener('keydown', (e) => {
 
     if (currentPhase === 'question') {
         if (quizMode) {
-            if (key === 'o' || key === 'm' || key === ' ') { 
+            // クイズモード: O/X または M/B、Enter/Spaceで「○」回答
+            if (key === 'o' || key === 'm' || key === ' ' || key === 'enter') { 
                 e.preventDefault(); 
                 submitAnswer(true); 
             }
@@ -329,12 +367,14 @@ document.addEventListener('keydown', (e) => {
                 submitAnswer(false); 
             }
         } else {
+            // 学習モード: Enter/Space/右矢印で答えを見る
             if (key === 'enter' || key === ' ' || key === 'arrowright') { 
                 e.preventDefault();
                 showAnswer(); 
             }
         }
     } else if (currentPhase === 'answer') {
+        // 解答ページ: 左で戻る、右/Enter/Spaceで次へ
         if (key === 'arrowleft') { backToQuestion(); }
         else if (key === 'arrowright' || key === 'enter' || key === ' ') {
             e.preventDefault();
