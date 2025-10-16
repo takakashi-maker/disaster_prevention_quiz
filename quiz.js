@@ -147,8 +147,14 @@ function renderHeader() {
     if (currentPhase === 'question' || currentPhase === 'answer') {
         const scoreHtml = quizMode ? `<span class="score-display">正解: ${score}</span>` : '';
         
-        const prevBtn = `<button class="btn btn-sm btn-back" onclick="previousQuestion()" ${currentIndex === 0 ? 'disabled' : ''}>← 前の問題</button>`;
-        const nextBtn = `<button class="btn btn-sm btn-back" onclick="nextQuestion()" ${currentIndex === QUESTIONS.length - 1 ? 'disabled' : ''}>次の問題 →</button>`;
+        // ★修正済み: アイコン(←)とテキスト(前の問題)をspan.iconとspan.textで分ける
+        const prevBtn = `<button class="btn btn-sm btn-back" onclick="previousQuestion()" ${currentIndex === 0 ? 'disabled' : ''}>
+            <span class="icon">←</span> <span class="text">前の問題</span>
+        </button>`;
+        // ★修正済み: アイコン(→)とテキスト(次の問題)をspan.iconとspan.textで分ける
+        const nextBtn = `<button class="btn btn-sm btn-back" onclick="nextQuestion()" ${currentIndex === QUESTIONS.length - 1 ? 'disabled' : ''}>
+            <span class="text">次の問題</span> <span class="icon">→</span>
+        </button>`;
 
         statusContent = `
             ${prevBtn}
@@ -165,20 +171,27 @@ function renderHeader() {
     // 右側: コントロールエリア 
     const currentThemeDisplay = currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1);
     const modeDisplay = quizMode ? 'クイズモード' : '学習モード';
+    const nextModeDisplay = quizMode ? '学習モードへ' : 'クイズモードへ'; // 遷移先のモード名
     const soundIcon = isSoundOn ? '🔊' : '🔇';
+    const soundText = isSoundOn ? 'サウンドOFF' : 'サウンドON'; // サウンドON/OFFテキスト
 
+    // ★修正済み: アイコンとテキストをspan.iconとspan.textで分ける
     controlContent += `
         <button class="btn btn-sm btn-mode-toggle" onclick="toggleMode()" title="${modeDisplay}を切り替え">
-            <span style="font-size: 1rem; font-weight: 700;">${modeDisplay}</span>
+            <span class="icon" style="font-size: 1.2rem;">🔄</span>
+            <span class="text">${nextModeDisplay}</span>
         </button>
         <button class="btn btn-sm btn-sound-toggle" onclick="toggleSound()" title="効果音オン/オフ">
-            <span style="font-size: 1.2rem;">${soundIcon}</span> 
+            <span class="icon" style="font-size: 1.2rem;">${soundIcon}</span> 
+            <span class="text">${soundText}</span>
         </button>
         <button class="btn btn-sm btn-back" onclick="changeTheme()" title="テーマ変更">
-            <span style="font-size: 1.2rem;">🎨</span> ${currentThemeDisplay}
+            <span class="icon" style="font-size: 1.2rem;">🎨</span> 
+            <span class="text">${currentThemeDisplay}</span>
         </button>
         <button class="btn btn-sm btn-back" onclick="retryQuiz()" title="最初に戻る">
-            <span style="font-size: 1.2rem;">🏠</span> リセット
+            <span class="icon" style="font-size: 1.2rem;">🏠</span> 
+            <span class="text">リセット</span>
         </button>
     `;
 

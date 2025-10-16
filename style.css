@@ -137,6 +137,11 @@ body {
     cursor: pointer;
     box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
     min-width: fit-content;
+    /* アイコンとテキストの配置調整 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
 }
 .header-group .btn-sm:hover {
     background: rgba(255, 255, 255, 0.3);
@@ -151,6 +156,16 @@ body {
     box-shadow: none;
     transform: none;
 }
+.header-group .btn-sm .icon {
+    /* アイコンのスタイル (特にPC表示時) */
+    font-size: 1.2rem;
+    line-height: 1;
+}
+.header-group .btn-sm .text {
+    /* テキストのスタイル (特にPC表示時) */
+    font-weight: 700;
+}
+
 
 /* モード切り替えボタンの専用スタイル */
 .btn-mode-toggle {
@@ -532,6 +547,25 @@ body {
 
 /* メディアクエリ (モバイル調整) */
 @media (max-width: 768px) {
+  /* ★★★ 前回の追加コード (ボタンをアイコンのみにする) ★★★ */
+  .header-group .btn-sm .text {
+    /* モバイル表示時、ボタン内のテキスト部分を非表示にする */
+    display: none;
+  }
+  .header-group .btn-sm {
+    /* アイコンのみになるため、パディングを少し調整 */
+    padding: 0.3rem 0.6rem; 
+    /* アイコンとテキストの隙間を消す */
+    gap: 0;
+  }
+  /* ★★★ ここから今回の追加コード (問題番号と正答数を非表示にする) ★★★ */
+  .question-count,
+  .score-display {
+      /* 問題番号と正答数を非表示にする */
+      display: none !important;
+  }
+  /* ★★★ 今回の追加コードここまで ★★★ */
+    
   body {
       padding-top: 50px;
   }
@@ -543,10 +577,7 @@ body {
   .header-group {
       gap: 0.5rem;
   }
-  .header-group .btn-sm {
-      font-size: 0.7rem;
-      padding: 0.2rem 0.6rem;
-  }
+  /* .header-group .btn-sm は上に移動 */
   .question-count {
       font-size: 1.2rem;
   }
