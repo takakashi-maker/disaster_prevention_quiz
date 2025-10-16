@@ -30,16 +30,16 @@ Webブラウザ上で動作する、シンプルな防災知識の○×クイズ
 | `questions.js` | **問題データ** を定義するJavaScriptファイル。このファイルに問題を追記します。 |
 | `images/` | クイズで使用する全ての画像ファイルを格納するフォルダ。 |
 
-### 必須画像ファイル (全て拡張子 `.png` に変更されています)
+### 必須画像ファイル (全て拡張子 `.webp` に変更されています)
 
 テーマ機能と動作の安定性のために、以下の画像ファイル（または同等のダミー画像）が `images/` フォルダ内に必要です。
 
--   `opening.png` (旧 `opening.jpg` から変更。デフォルトテーマのオープニング画像)
--   `ending.png` (旧 `ending.jpg` から変更。デフォルトテーマのエンディング画像)
--   `autumn_opening.png`
--   `autumn_ending.png`
--   `halloween_opening.png`
--   `halloween_ending.png`
--   `autumn_bg.png` (秋テーマの背景テクスチャ)
--   `halloween_bg.png` (ハロウィンテーマの背景テクスチャ)
--   **`quiz_image_XXX.png`** (例: `quiz_image_001.png` など。各問題に対応する画像。`questions.js` にて連番で指定)
+-   `opening.webp` 
+-   `ending.webp` 
+-   `autumn_opening.webp`
+-   `autumn_ending.webp`
+-   `halloween_opening.webp`
+-   `halloween_ending.webp`
+-   `autumn_bg.webp` (秋テーマの背景テクスチャ)
+-   `halloween_bg.webp` (ハロウィンテーマの背景テクスチャ)
+-   **`quiz_image_XXX.webp`** (例: `quiz_image_001.webp` など。各問題に対応する画像。`questions.js` にて連番で指定)

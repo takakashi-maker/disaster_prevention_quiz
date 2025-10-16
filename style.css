@@ -510,7 +510,7 @@ body {
 /* ◆ テーマ装飾 (最終視認性調整済み) */
 /* -------------------------------------- */
 .theme-autumn {
-    background-image: url('images/autumn_bg.png'); 
+    background-image: url('images/autumn_bg.webp'); 
 }
 /* 秋テーマの文字影（明るい文字が見えるようにする） */
 .theme-autumn body {
@@ -522,7 +522,7 @@ body {
 }
 
 .theme-halloween {
-    background-image: url('images/halloween_bg.png'); 
+    background-image: url('images/halloween_bg.webp'); 
 }
 .theme-halloween body {
     /* 暗い背景に明るい文字色を使っているので、強い影を適用 */

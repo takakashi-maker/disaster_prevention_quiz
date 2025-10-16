@@ -233,8 +233,8 @@ function renderContent() {
   let mainHtml = '<div class="fade-container' + (isAnimating ? ' fade-out' : '') + '">';
 
   const themePrefix = currentTheme === 'default' ? '' : `${currentTheme}_`;
-  const openingImage = `images/${themePrefix}opening.png`; 
-  const endingImage = `images/${themePrefix}ending.png`; 
+  const openingImage = `images/${themePrefix}opening.webp`; 
+  const endingImage = `images/${themePrefix}ending.webp`; 
 
   if (currentPhase === 'opening') {
     // オープニング (シンプル化)
@@ -242,7 +242,7 @@ function renderContent() {
     mainHtml += `
       <div class="opening-screen">
         <div class="image-container image-container-large" style="animation: none;">
-            <img src="${openingImage}" onerror="this.onerror=null;this.src='images/opening.png';" alt="オープニング画像" class="quiz-image">
+            <img src="${openingImage}" onerror="this.onerror=null;this.src='images/opening.webp';" alt="オープニング画像" class="quiz-image">
         </div>
         <div class="opening-title">防災○×クイズ</div>
         <div class="opening-subtitle">全${QUESTIONS.length}問で防災の知識をチェック！<br>現在のモード：${modeDisplay}</div>
@@ -261,7 +261,7 @@ function renderContent() {
     mainHtml += `
       <div class="ending-screen">
         <div class="image-container image-container-large" style="animation: none;">
-            <img src="${endingImage}" onerror="this.onerror=null;this.src='images/ending.png';" alt="エンディング画像" class="quiz-image">
+            <img src="${endingImage}" onerror="this.onerror=null;this.src='images/ending.webp';" alt="エンディング画像" class="quiz-image">
         </div>
         <div class="ending-title">${endingTitle}</div>
         ${scoreMessage}
