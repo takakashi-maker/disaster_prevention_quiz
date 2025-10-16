@@ -1,27 +1,27 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>防災○×クイズ（最終版）</title>
-  
-  <link rel="stylesheet" href="style.css">
-  
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>防災○×クイズ</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="app" class="container">
-    <div class="content">
-      <div class="progress-bar" id="progress-bar"></div>
-      <div id="content-area"></div> 
-      
-      <div class="fixed-button-area">
+    <div id="header-bar" class="header-bar">
+    </div>
+    
+    <div class="container">
+        <div id="content-area">
         </div>
     </div>
-  </div>
-  
-  <script src="questions.js"></script>
-  
-  <script src="quiz.js"></script>
-  
+
+    <div id="progress-bar" class="progress-bar"></div>
+    
+    <audio id="sound-correct" src="sounds/correct.mp3" preload="auto"></audio>
+    <audio id="sound-wrong" src="sounds/wrong.mp3" preload="auto"></audio>
+    <audio id="sound-click" src="sounds/click.mp3" preload="auto"></audio>
+    
+    <script src="questions.js"></script> 
+    <script src="quiz.js"></script>
 </body>
 </html>

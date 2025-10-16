@@ -5,131 +5,309 @@
   /* ◆ 通常テーマ (デフォルト) */
   --bg-gradient-start: #f0f4f8;
   --bg-gradient-end: #c5d6e6;
-  --main-color: #4A90E2; /* 青 */
+  --main-color: #4A90E2; 
+  --header-bg: #4A90E2; 
+  --header-color: #ffffff;
+  --header-height: 60px; 
+  --progress-bar-height: 8px; 
   --accent-color: #7AC1FF;
   --text-color: #111827;
-  --box-shadow-main: 0 15px 45px rgba(0,0,0,0.15), 0 0 15px rgba(74, 144, 226, 0.2);
-  --btn-learn-start: #ff9933; /* 学習モードボタンの基本色 */
+  --box-shadow-main: 0 15px 45px rgba(0,0,0,0.15);
+  --btn-learn-start: #ff9933; 
   --btn-learn-end: #ffc61a;
   --btn-back-bg: #e5e7eb;
   --btn-back-color: #111827;
+  --btn-mode-toggle-bg: #5f9cfd; /* モードボタンの基本色 */
+  --btn-mode-toggle-color: #ffffff;
 }
 
-/* ◆ 秋テーマ */
+/* ◆ 秋テーマ (視認性修正済み) */
 .theme-autumn {
   --bg-gradient-start: #fbf7f0;
   --bg-gradient-end: #e6c5a3;
-  --main-color: #e88d13; /* オレンジブラウン */
-  --accent-color: #ffb74d;
-  --text-color: #58331d;
-  --box-shadow-main: 0 15px 45px rgba(0,0,0,0.15), 0 0 15px rgba(232, 141, 19, 0.2);
-  --btn-learn-start: #6b8e23; /* オリーブグリーン */
+  --main-color: #e88d13; 
+  --header-bg: #e88d13; 
+  --header-color: #fbf7f0;
+  --text-color: #fbf7f0; 
+  
+  --box-shadow-main: 0 15px 45px rgba(0,0,0,0.15);
+  --btn-learn-start: #6b8e23; 
   --btn-learn-end: #a4c639;
   --btn-back-bg: #d4e3b7;
   --btn-back-color: #58331d;
+  --btn-mode-toggle-bg: #f9b165; 
+  --btn-mode-toggle-color: #58331d;
 }
 
-/* ◆ ハロウィンテーマ */
+/* ◆ ハロウィンテーマ (視認性修正済み) */
 .theme-halloween {
   --bg-gradient-start: #301934;
   --bg-gradient-end: #1a081c;
-  --main-color: #ff6600; /* ハロウィンオレンジ */
-  --accent-color: #ff9933;
-  --text-color: #fce4ec; /* 明るいテキスト */
-  --box-shadow-main: 0 15px 45px rgba(255,102,0,0.15), 0 0 15px rgba(255, 102, 0, 0.3);
-  --btn-learn-start: #800080; /* パープル */
+  --main-color: #ff6600; 
+  --header-bg: #ff6600; 
+  --header-color: #fce4ec;
+  --text-color: #fce4ec; 
+  --box-shadow-main: 0 15px 45px rgba(255,102,0,0.15);
+  --btn-learn-start: #800080; 
   --btn-learn-end: #cc00cc;
   --btn-back-bg: #4a148c;
   --btn-back-color: #fce4ec;
+  --btn-mode-toggle-bg: #c90000; 
+  --btn-mode-toggle-color: #fce4ec;
 }
+
 
 /* 全体のリセットと基本スタイル */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-  /* ★変数適用 */
+  
+  font-size: 18px; 
+  /* 通常テーマのテキストシャドウ */
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.4); 
+  
   background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+  background-size: cover; 
+  background-repeat: no-repeat;
+  background-position: center center;
+
   color: var(--text-color);
   user-select: none;
   -webkit-user-select: none;
   overflow-x: hidden;
   position: relative;
-  height: 100%; 
+  min-height: 100vh; 
+  padding-top: var(--header-height); 
+  padding-bottom: var(--progress-bar-height); 
 }
+
+/* コンテンツ中央揃えコンテナ */
 .container {
-  min-height: 100vh;
+  width: 100%;
+  max-width: 1400px; 
+  margin: 0 auto;
+  padding: 2rem;
+  padding-bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  position: relative;
-}
-.content {
-  width: 100%;
-  max-width: 1200px;
-  background: #ffffff;
-  border-radius: 1.5rem;
-  /* ★変数適用 */
-  box-shadow: var(--box-shadow-main);
-  border: 3px solid var(--main-color);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  max-height: 90vh; 
-  min-height: auto; 
-  overflow: hidden; 
 }
 
-/* メインコンテンツエリアを独立させ、スクロールを担当させる */
+/* ヘッダーバーのスタイル */
+.header-bar {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--header-height);
+    background-color: var(--header-bg); 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 50; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--header-color);
+    font-size: 1.2rem;
+    padding: 0 2rem;
+}
+.header-bar-inner {
+    width: 100%;
+    max-width: 1400px; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap; 
+}
+
+/* ヘッダー内のボタンデザイン */
+.header-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.header-group .btn-sm {
+    padding: 0.3rem 0.8rem;
+    font-size: 0.9rem; 
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.15); 
+    color: var(--header-color);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px; 
+    transition: background 0.2s;
+    cursor: pointer;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+    min-width: fit-content;
+}
+.header-group .btn-sm:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+.header-group .btn-sm:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+}
+.header-group .btn-sm:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* モード切り替えボタンの専用スタイル */
+.btn-mode-toggle {
+    background: var(--btn-mode-toggle-bg);
+    color: var(--btn-mode-toggle-color);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+    border: none;
+}
+
+/* 効果音オン/オフボタンのスタイル */
+.btn-sound-toggle {
+    min-width: 35px; /* アイコンだけでも押せる幅を確保 */
+    padding: 0.3rem 0.6rem;
+}
+
+
+/* オープニング時の開始ボタン */
+.btn-start {
+    background: linear-gradient(145deg, #4CAF50, #66BB6A); 
+    color: white;
+    box-shadow: 0 6px 0 #388E3C; 
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+.btn-start:active {
+    box-shadow: 0 2px 0 #388E3C;
+}
+
+.question-count {
+    font-size: 1.7rem; 
+    font-weight: 900;
+    margin: 0 0.5rem; 
+}
+.score-display {
+    color: #ffcc00; 
+    font-weight: 700;
+    margin-left: 1rem;
+}
+
+
+/* コンテンツエリアのスタイル */
 #content-area {
+    width: 100%;
+    max-width: 1100px; 
+    background: transparent; 
+    border-radius: 1.5rem;
+    box-shadow: none;
+    border: none;
+    
     padding: 3rem; 
-    padding-bottom: 120px; 
-    overflow-y: auto; 
-    overflow-x: hidden;
+    padding-top: 5rem; 
+    padding-bottom: 3rem; 
     text-align: center;
     flex-grow: 1; 
-    min-height: 350px; 
-    /* デフォルトの文字色 */
     color: var(--text-color);
+    margin-top: 1rem; 
+    margin-bottom: 2rem; 
+    position: relative;
+    overflow: hidden;
 }
 
-/* ★設定ボタンエリア (位置修正) */
-.setting-buttons-area {
-    position: absolute; /* .contentに対して絶対位置 */
-    top: 20px;
-    right: 20px;
-    z-index: 30; /* 最前面に表示 */
-    display: flex;
-    gap: 10px; 
-    justify-content: flex-end;
-}
-.setting-buttons-area .btn {
-    font-size: 1.2rem;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    height: auto;
+/* プログレスバーのスタイル */
+.progress-bar {
+    position: fixed;
+    bottom: 0; 
+    left: 0;
+    width: 0;
+    height: var(--progress-bar-height);
+    background: linear-gradient(90deg, var(--main-color) 0%, var(--accent-color) 50%, var(--btn-learn-start) 100%);
+    transition: width 0.3s ease;
+    z-index: 60; 
 }
 
 
-.fade-container {
-  transition: opacity 0.3s ease;
-  position: relative;
-  z-index: 1;
+/* メインコンテンツボタンデザイン */
+.btn {
+    padding: 1.2rem 2.5rem; 
+    font-size: 1.3rem; 
+    font-weight: 700;
+    border: none;
+    border-radius: 50px; 
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    text-transform: uppercase;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2); 
 }
-.fade-out {
-  opacity: 0;
+.btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
 }
 
+/* クイズモード回答ボタン (○×) */
+.btn-answer-o {
+    background: linear-gradient(145deg, #4CAF50, #66BB6A); 
+    color: white;
+    box-shadow: 0 6px 0 #388E3C; 
+}
+.btn-answer-o:active {
+    box-shadow: 0 2px 0 #388E3C;
+}
+.btn-answer-x {
+    background: linear-gradient(145deg, #F44336, #E57373); 
+    color: white;
+    box-shadow: 0 6px 0 #D32F2F; 
+}
+.btn-answer-x:active {
+    box-shadow: 0 2px 0 #D32F2F;
+}
+
+/* 学習モード/答えを見るボタン */
+.btn-learn {
+    background: linear-gradient(145deg, var(--btn-learn-start), var(--btn-learn-end));
+    color: white;
+    box-shadow: 0 6px 0 #D38E00;
+}
+.btn-learn:active {
+    box-shadow: 0 2px 0 #D38E00;
+}
+
+/* 戻る/次の問題ボタン */
+.btn-back, .btn-next {
+    background: var(--btn-back-bg);
+    color: var(--btn-back-color);
+    box-shadow: 0 4px 0 #B0B0B0;
+    font-weight: 600;
+}
+.btn-back:active, .btn-next:active {
+    box-shadow: 0 2px 0 #B0B0B0;
+}
+
+/* 問題画像コンテナ */
 .image-container {
-  width: 350px;
-  height: 350px;
-  margin: 0 auto 2.5rem;
-  animation: float 3s ease-in-out infinite;
-  border-radius: 1rem;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  border: 5px solid #fff;
+    width: 300px;
+    height: 300px;
+    margin: 0 auto 2rem;
+    overflow: hidden;
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 3px solid var(--main-color);
+    position: relative;
+}
+
+/* オープニング画面のレイアウト */
+.opening-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: calc(100vh - var(--header-height) - 4rem); 
+    justify-content: center;
+}
+
+/* オープニング/エンディング画像のサイズを大きく */
+.image-container-large {
+    width: 500px; 
+    height: 500px; 
+    margin-bottom: 3rem;
+    border: 5px solid var(--main-color);
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4);
 }
 
 .quiz-image {
@@ -139,430 +317,299 @@ body {
     display: block;
 }
 
-.answer-padding-top {
-    height: 390px; 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column; 
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-15px); }
-}
-.question-text {
-  font-size: 2.5rem; 
-  font-weight: 900;
-  line-height: 1.5; 
-  color: #1f2937; /* 通常時の問題文の色 */
-  padding: 0 1rem;
-  margin-bottom: 1rem; 
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
-  word-break: keep-all; 
-}
-.prompt-text {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #6b7280; /* 通常時のプロンプトの色 */
-  margin-bottom: 3rem;
-}
-.answer-symbol {
-  font-size: 12rem;
-  font-weight: 900;
-  margin-bottom: 0; 
-  animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-@keyframes popIn {
-  0% { transform: scale(0); opacity: 0; }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); opacity: 1; }
-}
-.answer-correct {
-  color: #10b981;
-  text-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
-}
-.answer-wrong {
-  color: #ef4444;
-  text-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
-}
-.reason-text {
-  font-size: 1.5rem; 
-  line-height: 1.8; 
-  font-weight: 500;
-  color: #374151; /* ★通常時の解答理由の色 */
-  max-width: 900px;
-  margin: 0 auto 1.5rem; 
-  padding: 0 1rem;
-}
-.button-group {
-  display: flex;
-  gap: 1.5rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-.btn {
-  padding: 1.2rem 2.5rem;
-  border: none;
-  border-radius: 0.75rem;
-  font-size: 1.6rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s;
-  position: relative;
-  overflow: hidden;
-}
-.btn::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.3);
-  transform: translate(-50%, -50%);
-  transition: width 0.5s, height 0.5s;
-}
-.btn:hover::before {
-  width: 250px;
-  height: 250px;
-}
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-}
-.btn-quiz {
-    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-}
-.btn-learn {
-    /* ★変数適用 */
-    background: linear-gradient(135deg, var(--btn-learn-start) 0%, var(--btn-learn-end) 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(255, 153, 51, 0.4);
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-}
-.btn-answer-ox {
-  /* 修正: パディングを調整し、大きさを適正化 */
-  padding: 1.5rem 2.5rem;
-  font-size: 2rem;
-  color: white;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-}
-.btn-answer-o { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
-.btn-answer-x { background: linear-gradient(135deg, #ef4444 0%, #f87171 100%); }
-.btn-back {
-  /* ★変数適用 */
-  background: var(--btn-back-bg);
-  color: var(--btn-back-color);
-}
-.btn-next {
-  /* ★変数適用 */
-  background: linear-gradient(135deg, var(--main-color) 0%, var(--accent-color) 100%);
-  color: white;
-  box-shadow: 0 4px 12px var(--main-color);
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-}
-
-/* 一時的なアニメーション */
-.animated {
-    animation-duration: 1s;
-    animation-iteration-count: 1;
-}
-.earthquake-animation { animation-name: shake; }
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-  20%, 40%, 60%, 80% { transform: translateX(4px); }
-}
-.fire-animation { animation-name: flicker; }
-@keyframes flicker {
-  0% { opacity: 1; filter: brightness(1); }
-  50% { opacity: 0.9; filter: brightness(1.1); }
-  100% { opacity: 1; filter: brightness(1); }
-}
-.wave-animation { animation-name: wave; }
-@keyframes wave {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-8px) scale(1.03); }
-}
-
-.progress-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 8px;
-  /* ★変数適用 */
-  background: linear-gradient(90deg, var(--main-color) 0%, var(--accent-color) 50%, var(--btn-learn-start) 100%);
-  transition: width 0.3s ease;
-  border-radius: 0 0 8px 0;
-  z-index: 20; 
-}
-.opening-screen, .ending-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100%; 
-  gap: 3rem;
-  padding-bottom: 3rem; 
-}
+/* オープニング画面の文字サイズ調整 */
 .opening-title {
-  font-size: 4.5rem;
-  font-weight: 900;
-  /* ★変数適用 */
-  color: var(--main-color);
-  animation: titleGlow 2s ease-in-out infinite;
-  text-shadow: 0 0 30px rgba(74, 144, 226, 0.3); 
-  padding: 0 1rem;
-}
-@keyframes titleGlow {
-  0%, 100% { filter: brightness(1); transform: scale(1); }
-  50% { filter: brightness(1.1); transform: scale(1.02); }
+    font-size: 3.5rem; 
+    font-weight: 900;
+    margin-bottom: 0.5rem;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3); 
 }
 .opening-subtitle {
-  font-size: 1.8rem;
-  color: #374151;
-  font-weight: 600;
-  animation: fadeInUp 1s ease-out 0.5s both;
+    font-size: 1.5rem; 
+    margin-bottom: 3rem;
+    font-weight: 600;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
-.start-button-group {
+
+/* 問題文の文字サイズ調整 */
+.question-text {
+    font-size: 2.5rem; 
+    font-weight: 900; 
+    margin-bottom: 1.5rem;
+    line-height: 1.4;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+.prompt-text {
+    font-size: 1.5rem; 
+    margin-bottom: 2rem;
+    font-weight: 600;
+}
+
+/* 解答シンボル (○×) のスタイル */
+.answer-padding-top {
+    height: 300px; 
     display: flex;
-    gap: 2rem;
-    flex-wrap: wrap;
+    align-items: center;
     justify-content: center;
-    width: 100%; 
 }
-.start-button {
-  font-size: 1.8rem;
-  padding: 1.5rem 3rem;
-  border: none;
-  border-radius: 1rem;
-  font-weight: 900;
-  cursor: pointer;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-  animation: pulse 2s ease-in-out infinite, fadeInUp 1s ease-out 0.8s both;
-  transition: all 0.3s;
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+.answer-symbol {
+    font-size: 10rem;
+    font-weight: 900;
+    width: 1.5em; 
+    height: 1.5em;
+    line-height: 1.5em;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    margin-top: 0; 
+    
+    border: none; 
+    text-shadow: 0 5px 10px rgba(0, 0, 0, 0.3); 
+    
+    animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.27);
+    animation-fill-mode: forwards;
 }
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+
+.answer-correct {
+    color: white;
+    background: linear-gradient(145deg, #28a745, #5cb85c); 
+    box-shadow: 0 10px 20px rgba(40, 167, 69, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.8);
 }
-.start-button:hover {
-  transform: scale(1.1) !important;
+
+.answer-wrong {
+    color: white;
+    background: linear-gradient(145deg, #dc3545, #e75865); 
+    box-shadow: 0 10px 20px rgba(220, 53, 69, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes bounceIn {
+    0% {
+        transform: scale(0.3) rotate(-30deg);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.1) rotate(5deg);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+
+/* 解答/結果画面の文字サイズ調整 */
+.reason-text {
+    font-size: 1.8rem; 
+    font-weight: 600;
+    line-height: 1.6;
+    margin-top: 3rem; 
+    /* 中央寄せ */
+    padding: 0 2rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 .ending-title {
-  font-size: 3.5rem;
-  font-weight: 900;
-  /* ★変数適用 */
-  color: var(--main-color);
-  animation: fadeInScale 0.8s ease-out;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-}
-@keyframes fadeInScale {
-  from { opacity: 0; transform: scale(0.8); }
-  to { opacity: 1; transform: scale(1); }
+    font-size: 3rem; 
+    font-weight: 900;
+    margin-bottom: 1rem;
 }
 .ending-message {
-  font-size: 1.8rem;
-  color: #374151;
-  font-weight: 600;
-  text-align: center;
-  line-height: 1.6;
-  animation: fadeInUp 1s ease-out 0.3s both;
+    font-size: 1.5rem;
+    line-height: 1.6;
 }
-.score-display {
-    font-size: 2.5rem;
+.ending-score-display {
+    font-size: 2.2rem;
     font-weight: 900;
-    color: #10b981;
-    margin: 1.5rem 0;
-}
-.retry-button {
-  /* ★変数適用 */
-  font-size: 1.8rem;
-  padding: 1.2rem 2.8rem;
-  background: linear-gradient(135deg, var(--main-color) 0%, var(--accent-color) 100%);
-  color: white;
-  box-shadow: 0 8px 25px rgba(74, 144, 226, 0.5);
-  animation: fadeInUp 1s ease-out 0.9s both;
-  transition: all 0.3s;
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-}
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+    color: #ffcc00;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
 }
 
-/* ボタン固定エリアのスタイル */
-.fixed-button-area {
+
+/* 結果一覧テーブルの色付け */
+.result-wrong-text {
+    color: #dc3545;
+}
+.result-correct-text {
+    color: #28a745;
+}
+
+/* 結果一覧テーブルの列幅を固定する修正 */
+.result-table {
     width: 100%;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    padding: 1.5rem 3rem; 
-    height: 100px; 
-    background: #ffffff;
-    border-top: 1px solid #e5e7eb;
-    z-index: 10;
-    border-radius: 0 0 1.5rem 1.5rem;
-    display: flex; 
-    justify-content: center;
-    align-items: center;
+    border-collapse: separate;
+    border-spacing: 0 8px; 
+    font-size: 1rem;
+    table-layout: fixed; /* レイアウトを固定する */
 }
+.result-table th, .result-table td {
+    padding: 0.8rem 1rem;
+    text-align: left;
+    white-space: normal; /* 折り返しを許可する */
+}
+.result-table th:nth-child(1), .result-table td:nth-child(1) { width: 5%; }  /* No. */
+.result-table th:nth-child(2), .result-table td:nth-child(2) { width: 50%; } /* 問題文 */
+.result-table th:nth-child(3), .result-table td:nth-child(3) { width: 10%; } /* 正答 */
+.result-table th:nth-child(4), .result-table td:nth-child(4) { width: 15%; } /* あなたの回答 */
+.result-table th:nth-child(5), .result-table td:nth-child(5) { width: 20%; } /* アクション（空欄） */
 
-/* -------------------------------------- */
-/* ◆ テーマ装飾 (背景画像と文字色コントラスト調整) */
-/* -------------------------------------- */
-
-/* 秋テーマの強化 */
-.theme-autumn .content {
-    background: #fbf7f0;
-    background-image: url('images/autumn_bg.png'); 
-    background-size: cover; 
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-blend-mode: multiply; 
-    opacity: 0.98;
-    border: 3px solid var(--main-color);
-}
-
-/* ★★★ 秋テーマの文字色調整 (コントラスト再強化: 白い影を追加) ★★★ */
-.theme-autumn #content-area {
-    color: var(--text-color); /* #58331d */
-}
-.theme-autumn .opening-subtitle {
-    color: #58331d;
-}
-.theme-autumn .question-text {
-    color: #1e110a; /* 濃い焦げ茶色 */
-    /* 修正: 白い影を追加して背景から浮かせる */
-    text-shadow: 1px 1px 1px #fff, -1px -1px 1px #fff; 
-}
-.theme-autumn .prompt-text {
-    color: #1e110a; /* 濃い焦げ茶色 */
+.result-table thead th {
+    font-size: 1.1rem;
     font-weight: 700;
-    /* 修正: 白い影を追加して背景から浮かせる */
-    text-shadow: 1px 1px 1px #fff, -1px -1px 1px #fff;
+    background: var(--main-color);
+    color: white;
+    position: sticky;
+    top: 0;
 }
-/* 解答ページ理由テキスト */
-.theme-autumn .reason-text {
-    color: #1e110a; /* 濃い焦げ茶色 */
-    font-weight: 600; 
-    /* 修正: 白い影を追加して背景から浮かせる */
-    text-shadow: 1px 1px 1px #fff, -1px -1px 1px #fff; 
+.result-table tbody tr {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+.result-table tbody tr:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+.result-correct { background-color: #e6ffe6 !important; }
+.result-wrong { background-color: #ffe6e6 !important; }
+.result-unanswered { background-color: #f0f0f0 !important; }
+
+
+/* オープニング画面のボタン調整 */
+.button-group-large {
+    display: flex;
+    flex-direction: column; 
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+}
+.btn-large {
+    padding: 1.5rem 3rem; 
+    font-size: 1.5rem;
+    min-width: 300px;
 }
 
 
-/* ハロウィンテーマの強化 */
-.theme-halloween .content {
-    background: radial-gradient(circle at 50% 10%, #4a2d05 0%, #1a081c 100%); 
+/* -------------------------------------- */
+/* ◆ テーマ装飾 (最終視認性調整済み) */
+/* -------------------------------------- */
+.theme-autumn {
+    background-image: url('images/autumn_bg.png'); 
+}
+/* 秋テーマの文字影（明るい文字が見えるようにする） */
+.theme-autumn body {
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8), 
+                 -1px -1px 3px rgba(0, 0, 0, 0.8); 
+}
+.theme-autumn .header-bar {
+    text-shadow: none; /* ヘッダーは通常通り */
+}
+
+.theme-halloween {
     background-image: url('images/halloween_bg.png'); 
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-blend-mode: overlay; 
-    opacity: 0.95; 
-    border: 3px solid var(--accent-color); 
+}
+.theme-halloween body {
+    /* 暗い背景に明るい文字色を使っているので、強い影を適用 */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8); 
 }
 
-/* ハロウィンテーマの文字色調整 (暗い背景に合わせる) */
-.theme-halloween #content-area {
-    color: var(--text-color); /* #fce4ec (明るい色) */
+/* ★ 修正点: 結果一覧テーブルの文字色を全テーマで強制的に濃い色にする */
+.result-table tbody tr td {
+    color: #111827 !important; 
 }
-.theme-halloween .opening-title {
-    color: var(--accent-color);
-    text-shadow: 0 0 15px var(--accent-color), 0 0 30px var(--accent-color);
+/* 秋・ハロウィンテーマでも確実に文字色が濃くなるように再指定 */
+.theme-autumn .result-table tbody tr td,
+.theme-halloween .result-table tbody tr td {
+    color: #111827 !important; /* 濃い色を強制適用 */
 }
-.theme-halloween .question-text {
-    color: #fff; /* 問題文を白に変更 */
-    text-shadow: 0 0 10px rgba(255,102,0,0.5); /* 影をつけて目立たせる */
-}
-.theme-halloween .prompt-text,
-.theme-halloween .ending-message {
-    color: #ffcc99; /* 明るいオレンジ */
-}
-.theme-halloween .answer-correct {
-  color: #00ff7f; /* ネオングリーン */
-  text-shadow: 0 0 20px rgba(0, 255, 127, 0.6);
-}
-.theme-halloween .answer-wrong {
-  color: #ff3333; /* 鮮やかな赤 */
-  text-shadow: 0 0 20px rgba(255, 51, 51, 0.6);
-}
-.theme-halloween .opening-subtitle {
-    color: #ffcc99;
-}
-/* 解答ページ理由テキスト */
-.theme-halloween .reason-text {
-    color: #fff; 
-    text-shadow: 0 0 5px rgba(255,102,0,0.7); 
-    font-weight: 500;
+/* テーブルヘッダーの文字色は白で維持 */
+.theme-autumn .result-table thead th,
+.theme-halloween .result-table thead th {
+    color: white !important; 
 }
 
 
-/* メディアクエリ */
+/* メディアクエリ (モバイル調整) */
 @media (max-width: 768px) {
-  .content { 
-      max-height: 95vh;
+  body {
+      padding-top: 50px;
   }
-  .fixed-button-area {
-      padding: 1rem 1rem;
-      height: 90px; 
+  .header-bar {
+      height: 50px;
+      padding: 0 0.5rem;
+      font-size: 1rem;
+  }
+  .header-group {
+      gap: 0.5rem;
+  }
+  .header-group .btn-sm {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+  }
+  .question-count {
+      font-size: 1.2rem;
   }
   #content-area { 
-      padding: 2rem 1rem;
-      padding-bottom: 100px; 
-      min-height: 350px;
-      flex-grow: 1;
+      padding: 1.5rem;
+      padding-top: 3rem;
   }
-  
-  /* ★設定ボタンエリア (モバイルでの調整) */
-  .setting-buttons-area {
-      top: 10px;
-      right: 10px;
-      gap: 5px;
-  }
-  .setting-buttons-area .btn {
-      font-size: 1rem;
-      padding: 0.4rem 0.8rem;
-  }
-
   .image-container { 
-      width: 250px; 
-      height: 250px; 
-      margin-bottom: 1.5rem; 
+      width: 200px; 
+      height: 200px; 
+      margin-bottom: 1.5rem;
   }
-  
-  .answer-padding-top {
-      height: 274px; 
+  .image-container-large {
+      width: 300px;
+      height: 300px;
+      margin-bottom: 2rem;
   }
-  
+  /* モバイルでの文字サイズ調整 */
+  .opening-title {
+      font-size: 2rem;
+  }
+  .opening-subtitle {
+      font-size: 1rem;
+  }
   .question-text { 
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-  }
-  .prompt-text { font-size: 1.2rem; }
-  .answer-symbol { font-size: 7rem; }
-  .reason-text { 
-      font-size: 1.1rem;
-      line-height: 1.7;
+      font-size: 1.4rem; 
       margin-bottom: 1rem;
   }
-  .btn { font-size: 1.2rem; padding: 0.8rem 1.8rem; }
-  .btn-answer-ox { 
-      padding: 1.5rem 2rem; 
-      font-size: 1.5rem;
-      flex-grow: 1;
+  .prompt-text {
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
   }
-  .button-group {
-      gap: 1rem;
+  .btn {
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
   }
-  .opening-title { font-size: 2.5rem; }
-  .opening-subtitle { font-size: 1.2rem; }
-  .start-button { font-size: 1.5rem; padding: 1.2rem 2.5rem; }
-  .start-button-group { gap: 1rem; }
-  .score-display { font-size: 2rem; }
+  .reason-text {
+      font-size: 1.1rem;
+      padding: 0 1rem;
+      margin-top: 2rem;
+  }
+  .answer-padding-top {
+      height: 200px; 
+  }
+  .answer-symbol {
+      font-size: 6rem;
+  }
+  .ending-title {
+      font-size: 2rem;
+  }
+  .ending-message {
+      font-size: 1.1rem;
+  }
+  .ending-score-display {
+      font-size: 1.8rem;
+  }
+  /* モバイルの大きなボタン */
+  .button-group-large {
+    gap: 1rem;
+  }
+  .btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    min-width: 250px;
+  }
 }

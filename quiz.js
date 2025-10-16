@@ -1,182 +1,254 @@
 /* quiz.js */
 
-// ! 問題データ (QUESTIONS) は questions.js から読み込まれます。
-
 // アプリケーション状態
 let currentIndex = 0;
 let currentPhase = 'opening';
 let isAnimating = false;
 let score = 0;
-let quizMode = true;
+// 初期値を LocalStorageから取得（未設定ならクイズモード true）
+let quizMode = JSON.parse(localStorage.getItem('quizMode')) !== false; 
+// 効果音のオン/オフ設定
+let isSoundOn = JSON.parse(localStorage.getItem('isSoundOn')) !== false;
 
 // 🎨 テーマ管理
 const THEMES = ['default', 'autumn', 'halloween'];
 let currentTheme = localStorage.getItem('quizTheme') || THEMES[0];
 let currentThemeIndex = THEMES.indexOf(currentTheme); 
 
-function applyTheme(themeName) {
-    const body = document.body;
-    // 既存のテーマクラスをリセット
-    body.classList.remove('theme-autumn', 'theme-halloween'); 
+// 初期化時にテーマを適用
+document.addEventListener('DOMContentLoaded', () => {
+    applyTheme(currentTheme);
+    render(); 
+});
 
-    if (themeName !== 'default') {
-        body.classList.add(`theme-${themeName}`);
-    }
-    // localStorageに保存
-    localStorage.setItem('quizTheme', themeName);
-    currentTheme = themeName;
+// テーマ適用関数
+function applyTheme(theme) {
+    document.body.className = `theme-${theme}`;
+    localStorage.setItem('quizTheme', theme);
+    currentTheme = theme;
+    currentThemeIndex = THEMES.indexOf(currentTheme);
 }
 
+// テーマ変更関数
 function changeTheme() {
-    playClickSound(); // テーマ変更ボタンのクリック音
+    playClickSound(); 
     currentThemeIndex = (currentThemeIndex + 1) % THEMES.length;
     applyTheme(THEMES[currentThemeIndex]);
-    
+    render(); 
+}
+
+// モード切り替え関数
+function toggleMode() {
+    playClickSound();
+    quizMode = !quizMode;
+    localStorage.setItem('quizMode', quizMode); // LocalStorageに保存
+    // オープニング画面なら何もしない
     if (currentPhase === 'opening') {
-        render(); // オープニング画面を更新
+        render();
+        return;
+    }
+    // クイズ中なら問題をリセットして新しいモードで開始
+    startQuiz(quizMode, true);
+}
+
+// 効果音切り替え関数
+function toggleSound() {
+    isSoundOn = !isSoundOn;
+    localStorage.setItem('isSoundOn', isSoundOn); // LocalStorageに保存
+    render();
+    if(isSoundOn) {
+        playClickSound(); // 音がオンになった時だけクリック音を鳴らす
     }
 }
-// 初期化時にテーマを適用
-applyTheme(currentTheme); 
 
 
 // ----------------------------------------------------
-// 🔊 Audio API の定義 (効果音ON/OFF機能は削除し、常に再生)
+// 音声管理 (効果音オン/オフ機能を追加)
 // ----------------------------------------------------
-let audioContext = null;
-function initAudio() {
-  if (!audioContext) {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  }
-}
-
 function playCorrectSound() {
-  initAudio();
-  const osc = audioContext.createOscillator();
-  const gain = audioContext.createGain();
-  osc.connect(gain);
-  gain.connect(audioContext.destination);
-  osc.type = 'sine';
-  
-  osc.frequency.setValueAtTime(600, audioContext.currentTime);
-  osc.frequency.setValueAtTime(900, audioContext.currentTime + 0.05);
-  osc.frequency.setValueAtTime(1200, audioContext.currentTime + 0.1);
-  
-  gain.gain.setValueAtTime(0.3, audioContext.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.25);
-  osc.start(audioContext.currentTime);
-  osc.stop(audioContext.currentTime + 0.25);
+    if (!isSoundOn) return;
+    const sound = document.getElementById('sound-correct');
+    if (sound) {
+        sound.currentTime = 0; 
+        sound.play().catch(e => console.error("Correct sound error:", e));
+    }
 }
-
 function playWrongSound() {
-  initAudio();
-  const osc = audioContext.createOscillator();
-  const gain = audioContext.createGain();
-  osc.connect(gain);
-  gain.connect(audioContext.destination);
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(300, audioContext.currentTime);
-  osc.frequency.setValueAtTime(200, audioContext.currentTime + 0.15);
-  gain.gain.setValueAtTime(0.2, audioContext.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-  osc.start(audioContext.currentTime);
-  osc.stop(audioContext.currentTime + 0.3);
+    if (!isSoundOn) return;
+    const sound = document.getElementById('sound-wrong');
+    if (sound) {
+        sound.currentTime = 0; 
+        sound.play().catch(e => console.error("Wrong sound error:", e));
+    }
+}
+function playClickSound() {
+    if (!isSoundOn) return;
+    const sound = document.getElementById('sound-click');
+    if (sound) {
+        sound.currentTime = 0; 
+        sound.play().catch(e => console.error("Click sound error:", e));
+    }
 }
 
-function playClickSound() { 
-  initAudio();
-  const osc = audioContext.createOscillator();
-  const gain = audioContext.createGain();
-  osc.connect(gain);
-  gain.connect(audioContext.destination);
-  osc.type = 'sine';
-  osc.frequency.value = 600;
-  gain.gain.setValueAtTime(0.1, audioContext.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-  osc.start(audioContext.currentTime);
-  osc.stop(audioContext.currentTime + 0.1);
-}
 // ----------------------------------------------------
-
+// UI/アニメーション (変更なし)
+// ----------------------------------------------------
 function updateProgress() {
-  const progressBar = document.getElementById('progress-bar');
-  const progress = ((currentIndex) / QUESTIONS.length) * 100;
-  progressBar.style.width = progress + '%';
-  if (currentPhase === 'opening' || currentPhase === 'ending') {
-      progressBar.style.width = '0%';
-  }
+    const progress = document.getElementById('progress-bar');
+    if (progress) {
+        if (currentPhase === 'question' || currentPhase === 'answer') {
+            const percentage = ((currentIndex + 1) / QUESTIONS.length) * 100;
+            progress.style.width = `${percentage}%`;
+            progress.style.display = 'block';
+        } else {
+            progress.style.width = `0%`; 
+        }
+    }
 }
 
-function applyAnimation(elementId, animationClass) {
+function applyAnimation(elementId, animationType) {
     const element = document.getElementById(elementId);
-    if (element && animationClass) {
-        element.classList.add('animated');
-        element.classList.add(animationClass);
-        setTimeout(() => {
-            element.classList.remove('animated');
-            element.classList.remove(animationClass);
-        }, 1000);
-    }
+    if (!element || !animationType) return;
+    
+    element.classList.remove('animated', 'earthquake-animation', 'fire-animation', 'wave-animation');
+
+    setTimeout(() => {
+        if (animationType === 'earthquake') {
+            element.classList.add('animated', 'earthquake-animation');
+        } else if (animationType === 'fire') {
+            element.classList.add('animated', 'fire-animation');
+        } else if (animationType === 'wave') {
+            element.classList.add('animated', 'wave-animation');
+        }
+    }, 10);
 }
 
-function renderButtons(html) {
-    const fixedButtonArea = document.querySelector('.fixed-button-area');
-    if (fixedButtonArea) {
-        fixedButtonArea.innerHTML = html;
+function animateTransition(callback) {
+    isAnimating = true;
+    render();
+    setTimeout(() => {
+        callback();
+        isAnimating = false;
+        render();
+    }, 300); 
+}
+
+// ----------------------------------------------------
+// ヘッダーレンダリング関数 
+// ----------------------------------------------------
+function renderHeader() {
+    const headerBar = document.getElementById('header-bar');
+    if (!headerBar) return; 
+    
+    let statusContent = ''; 
+    let controlContent = ''; 
+
+    // 左側: ステータス/モード表示
+    if (currentPhase === 'question' || currentPhase === 'answer') {
+        const scoreHtml = quizMode ? `<span class="score-display">正解: ${score}</span>` : '';
+        
+        const prevBtn = `<button class="btn btn-sm btn-back" onclick="previousQuestion()" ${currentIndex === 0 ? 'disabled' : ''}>← 前の問題</button>`;
+        const nextBtn = `<button class="btn btn-sm btn-back" onclick="nextQuestion()" ${currentIndex === QUESTIONS.length - 1 ? 'disabled' : ''}>次の問題 →</button>`;
+
+        statusContent = `
+            ${prevBtn}
+            <span class="question-count">${currentIndex + 1} / ${QUESTIONS.length} 問目</span>
+            ${scoreHtml}
+            ${nextBtn}
+        `;
+        
+    } else {
+        // オープニング/エンディング/結果一覧
+        statusContent = `<span class="mode-display" style="font-weight: 900; font-size: 1.3rem;">防災○×クイズ</span>`;
     }
+    
+    // 右側: コントロールエリア 
+    const currentThemeDisplay = currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1);
+    const modeDisplay = quizMode ? 'クイズモード' : '学習モード';
+    const soundIcon = isSoundOn ? '🔊' : '🔇';
+
+    controlContent += `
+        <button class="btn btn-sm btn-mode-toggle" onclick="toggleMode()" title="${modeDisplay}を切り替え">
+            <span style="font-size: 1rem; font-weight: 700;">${modeDisplay}</span>
+        </button>
+        <button class="btn btn-sm btn-sound-toggle" onclick="toggleSound()" title="効果音オン/オフ">
+            <span style="font-size: 1.2rem;">${soundIcon}</span> 
+        </button>
+        <button class="btn btn-sm btn-back" onclick="changeTheme()" title="テーマ変更">
+            <span style="font-size: 1.2rem;">🎨</span> ${currentThemeDisplay}
+        </button>
+        <button class="btn btn-sm btn-back" onclick="retryQuiz()" title="最初に戻る">
+            <span style="font-size: 1.2rem;">🏠</span> リセット
+        </button>
+    `;
+
+    headerBar.innerHTML = `<div class="header-bar-inner">
+        <div id="status-area" class="header-group">${statusContent}</div>
+        <div id="control-area" class="header-group">${controlContent}</div>
+    </div>`;
+    
+    headerBar.style.display = 'flex'; 
 }
 
 
-// レンダリング関数
+// ----------------------------------------------------
+// メインレンダリング関数
+// ----------------------------------------------------
 function render() {
+  renderHeader(); 
+  renderContent();
+  updateProgress();
+}
+
+function renderContent() {
   const contentArea = document.getElementById('content-area');
+  if (!contentArea) return; 
+
+  // QUESTIONSが定義されていない場合の安全装置
+  if (typeof QUESTIONS === 'undefined' || QUESTIONS.length === 0) {
+      contentArea.innerHTML = `
+        <div class="opening-screen" style="justify-content: flex-start; padding-top: 100px;">
+          <div class="opening-title" style="color: #dc3545;">🚨 エラー 🚨</div>
+          <div class="opening-subtitle" style="font-size: 1.3rem;">問題データ(questions.js)が読み込めていないか、<br>またはQUESTIONS配列が空です。<br>ファイルパスと読み込み順を確認してください。</div>
+        </div>
+      `;
+      return;
+  }
+  
   const q = QUESTIONS[currentIndex];
 
   let mainHtml = '<div class="fade-container' + (isAnimating ? ' fade-out' : '') + '">';
-  let buttonHtml = '';
 
-  // ----------------------------------------------------
-  // ★ 画像パスの動的決定
-  // ----------------------------------------------------
   const themePrefix = currentTheme === 'default' ? '' : `${currentTheme}_`;
-  const openingImage = `images/${themePrefix}opening.png`;
-  const endingImage = `images/${themePrefix}ending.png`;
-  // ----------------------------------------------------
+  const openingImage = `images/${themePrefix}opening.png`; 
+  const endingImage = `images/${themePrefix}ending.png`; 
 
   if (currentPhase === 'opening') {
-    const currentThemeDisplay = currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1);
-    
-    // 設定ボタンエリアをテーマ変更ボタンのみに修正
+    // オープニング (シンプル化)
+    const modeDisplay = quizMode ? 'クイズモード' : '学習モード';
     mainHtml += `
-      <div class="setting-buttons-area">
-          <button class="btn btn-back" onclick="changeTheme()">
-              🎨 テーマ変更 (${currentThemeDisplay})
-          </button>
-      </div>
-
       <div class="opening-screen">
-        <div class="image-container" style="animation: none;">
-            <img src="${openingImage}" alt="オープニング画像" class="quiz-image">
+        <div class="image-container image-container-large" style="animation: none;">
+            <img src="${openingImage}" onerror="this.onerror=null;this.src='images/opening.png';" alt="オープニング画像" class="quiz-image">
         </div>
         <div class="opening-title">防災○×クイズ</div>
-        <div class="opening-subtitle">全${QUESTIONS.length}問で防災の知識をチェック！</div>
+        <div class="opening-subtitle">全${QUESTIONS.length}問で防災の知識をチェック！<br>現在のモード：${modeDisplay}</div>
+        
+        <div class="button-group button-group-large">
+            <button class="btn btn-start btn-large" onclick="startQuiz(quizMode)">🎮 開始する (Enter) 🎮</button>
+        </div>
       </div>
     `;
     
-    buttonHtml = `
-      <div class="start-button-group">
-          <button class="start-button btn-quiz" onclick="startQuiz(true)">1. クイズモード (○×で回答) →</button>
-          <button class="start-button btn-learn" onclick="startQuiz(false)">2. 学習モード (答えを見る) →</button>
-      </div>
-    `;
-
   } else if (currentPhase === 'ending') {
-    const scoreMessage = quizMode ? `<div class="score-display">${score} / ${QUESTIONS.length} 問 正解！</div>` : '';
+    // 終了画面
+    const scoreMessage = quizMode ? `<div class="score-display ending-score-display">${score} / ${QUESTIONS.length} 問 正解！</div>` : '';
     const endingTitle = quizMode ? `🎉 クイズ終了！おつかれさまでした！ 🎉` : `学習終了！おつかれさまでした！`;
+    
     mainHtml += `
       <div class="ending-screen">
-        <div class="image-container" style="animation: none;">
-            <img src="${endingImage}" alt="エンディング画像" class="quiz-image">
+        <div class="image-container image-container-large" style="animation: none;">
+            <img src="${endingImage}" onerror="this.onerror=null;this.src='images/ending.png';" alt="エンディング画像" class="quiz-image">
         </div>
         <div class="ending-title">${endingTitle}</div>
         ${scoreMessage}
@@ -185,29 +257,81 @@ function render() {
           今日学んだことを忘れず、災害に備えましょう！
         </div>
       </div>
+      <div class="button-group button-group-ending">
+        ${quizMode ? `<button class="btn btn-next" onclick="showResultList()">結果を一覧で見る (Enter) →</button>` : ''}
+      </div>
     `;
-    buttonHtml = `<div class="button-group"><button class="retry-button" onclick="retryQuiz()">↩ モードを選び直す</button></div>`;
     
-  } else if (currentPhase === 'question') {
-    const questionNumber = `問題 ${currentIndex + 1} / ${QUESTIONS.length}`;
+  } else if (currentPhase === 'results') {
+    // 結果一覧ページ 
+    let resultListHtml = QUESTIONS.map((item, index) => {
+        const questionNum = index + 1;
+        const correctSymbol = item.answer ? '○' : '×';
+        
+        let userResult, resultClass;
+        if (!item.userAnswer) {
+            userResult = '未回答';
+            resultClass = 'result-unanswered';
+        } else {
+            const userSymbol = item.userAnswer === true ? '○' : '×';
+            resultClass = item.userCorrect ? 'result-correct' : 'result-wrong';
+            userResult = `${userSymbol} (${item.userCorrect ? '正解' : '不正解'})`;
+        }
+
+        return `
+            <tr class="${resultClass}">
+                <td>${questionNum}</td>
+                <td>${item.q}</td>
+                <td class="correct-col">${correctSymbol}</td>
+                <td class="user-col">${userResult}</td>
+                <td></td>
+            </tr>
+        `;
+    }).join('');
+
     mainHtml += `
-      <div style="font-size: 1.5rem; color: #4A90E2; font-weight: 700; margin-bottom: 1.5rem;">🔹 ${questionNumber} 🔹</div>
+      <div class="result-list-screen">
+        <div class="ending-title">クイズ結果一覧</div>
+        <div class="ending-message" style="margin-bottom: 2rem;">
+            全${QUESTIONS.length}問中、**${score}問** 正解しました！
+        </div>
+        <div class="result-table-container">
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>問題文</th>
+                        <th class="correct-col">正答</th>
+                        <th class="user-col">あなたの回答</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${resultListHtml}
+                </tbody>
+            </table>
+        </div>
+      </div>
+      <div class="button-group button-group-ending">
+        <button class="btn btn-back" onclick="showEnding()">← 終了画面に戻る</button>
+      </div>
+    `;
+
+  } else if (currentPhase === 'question') {
+    // 問題表示
+    mainHtml += `
       <div class="image-container" id="current-image-container">
         <img src="${q.image}" alt="問題${currentIndex + 1}の画像" class="quiz-image">
       </div>
       <div class="question-text">${q.q}</div>
-      <div class="prompt-text">${quizMode ? '答えを選んでください (O/XキーまたはEnter/Spaceキーでも回答可)' : '○ か × か (Enter/→キーで答えを見る)'}</div>
-    `;
-    
-    buttonHtml = `
+      <div class="prompt-text">${quizMode ? '答えを選んでください (O/X/Enter/Spaceキー)' : '○ か × か (下のボタンか Enter/→キーで答えを見る)'}</div>
+      
       <div class="button-group">
-        ${currentIndex > 0 ? '<button class="btn btn-back" onclick="previousQuestion()">← 前の問題</button>' : '<div style="width: 200px; opacity: 0;"></div>'}
-        
         ${quizMode ? `
-            <button class="btn btn-answer-ox btn-answer-o" onclick="submitAnswer(true)">○ (まる)</button>
-            <button class="btn btn-answer-ox btn-answer-x" onclick="submitAnswer(false)">× (ばつ)</button>
+            <button class="btn btn-answer-ox btn-answer-o" onclick="submitAnswer(true)">○ (O/Enter)</button>
+            <button class="btn btn-answer-ox btn-answer-x" onclick="submitAnswer(false)">× (X/Space)</button>
         ` : `
-            <button class="btn btn-learn" onclick="showAnswer()">Enter. 答えを見る ✨</button>
+            <button class="btn btn-learn" onclick="showAnswer()">答えを見る ✨</button>
         `}
       </div>
     `;
@@ -217,25 +341,21 @@ function render() {
     }, 10);
 
   } else { // currentPhase === 'answer'
+    // 解答表示
     const symbolClass = q.answer ? 'answer-correct' : 'answer-wrong';
     const symbol = q.answer ? '○' : '×';
     const showNext = currentIndex < QUESTIONS.length - 1;
-    const questionNumber = `問題 ${currentIndex + 1} / ${QUESTIONS.length}`;
 
     mainHtml += `
-      <div style="font-size: 1.5rem; color: #4A90E2; font-weight: 700; margin-bottom: 1.5rem;">🔹 ${questionNumber} 🔹</div>
-      
       <div class="answer-padding-top">
           <div class="answer-symbol ${symbolClass}">${symbol}</div>
       </div>
       
       <div class="reason-text">${q.reason}</div>
-    `;
-    
-    buttonHtml = `
-      <div class="button-group">
+      
+      <div class="button-group button-group-ending">
         <button class="btn btn-back" onclick="backToQuestion()">← 問題に戻る</button>
-        ${showNext ? '<button class="btn btn-next" onclick="nextQuestion()">→ 次の問題 (Enter)</button>' : '<button class="btn btn-next" onclick="showEnding()">🎉 結果を見る (Enter)</button>'}
+        ${showNext ? '<button class="btn btn-next" onclick="nextQuestion()">→ 次の問題 (Enter)</button>' : '<button class="btn btn-next" onclick="showEnding()">🎉 終了画面へ (Enter)</button>'}
       </div>
     `;
   }
@@ -243,29 +363,26 @@ function render() {
   mainHtml += '</div>';
   
   contentArea.innerHTML = mainHtml;
-  renderButtons(buttonHtml); 
-  
-  updateProgress();
 }
 
-// アニメーション付き状態変更 (省略)
-function animateTransition(callback) {
-  if (isAnimating) return;
-  isAnimating = true;
-  render();
 
-  setTimeout(() => {
-    callback();
-    isAnimating = false;
-    render();
-  }, 150);
-}
+// ----------------------------------------------------
+// イベントハンドラー 
+// ----------------------------------------------------
 
-// イベントハンドラー (省略)
-function startQuiz(mode) {
-  playClickSound();
+function startQuiz(mode, isReStart = false) {
+  playClickSound(); 
   quizMode = mode;
-  score = 0;
+  
+  // 再スタートでない場合（オープニングからの開始）はスコアをリセット
+  if (!isReStart) {
+    score = 0;
+    QUESTIONS.forEach(q => {
+        q.userAnswer = null;
+        q.userCorrect = null;
+    });
+  }
+  
   animateTransition(() => {
     currentIndex = 0; 
     currentPhase = 'question';
@@ -273,14 +390,21 @@ function startQuiz(mode) {
 }
 
 function showEnding() {
-  playClickSound();
+  playClickSound(); 
   animateTransition(() => {
     currentPhase = 'ending';
   });
 }
 
+function showResultList() {
+    playClickSound(); 
+    animateTransition(() => {
+        currentPhase = 'results';
+    });
+}
+
 function retryQuiz() {
-  playClickSound();
+  playClickSound(); 
   animateTransition(() => {
     currentIndex = 0;
     currentPhase = 'opening';
@@ -288,16 +412,22 @@ function retryQuiz() {
 }
 
 function submitAnswer(userAnswer) {
+    if (!quizMode || isAnimating) return;
+
     const q = QUESTIONS[currentIndex];
     
     const isCorrect = (q.answer === userAnswer);
     if (isCorrect) {
-        score++;
-        playCorrectSound();
+        // 再回答の場合はスコアを増やさない
+        if (q.userCorrect === null || q.userCorrect === false) {
+             score++;
+        }
+        playCorrectSound(); 
     } else {
-        playWrongSound();
+        playWrongSound(); 
     }
     
+    q.userAnswer = userAnswer;
     q.userCorrect = isCorrect; 
 
     animateTransition(() => {
@@ -306,92 +436,104 @@ function submitAnswer(userAnswer) {
 }
 
 function showAnswer() {
-  playClickSound();
-  animateTransition(() => {
-    currentPhase = 'answer';
-  });
+    if (quizMode || isAnimating) return; 
+    playClickSound(); 
+    animateTransition(() => {
+        currentPhase = 'answer';
+    });
 }
 
 function backToQuestion() {
-  playClickSound();
-  animateTransition(() => {
-    currentPhase = 'question';
-  });
+    playClickSound(); 
+    animateTransition(() => {
+        currentPhase = 'question';
+    });
 }
+
 function nextQuestion() {
-  playClickSound();
-  if (currentIndex < QUESTIONS.length - 1) {
-    animateTransition(() => {
-      currentIndex++;
-      currentPhase = 'question';
-    });
-  }
-}
-function previousQuestion() {
-  playClickSound();
-  if (currentIndex > 0) {
-    animateTransition(() => {
-      currentIndex--;
-      currentPhase = 'question';
-    });
-  }
-}
+    if (isAnimating) return;
+    playClickSound(); 
 
-// キーボードイベントの調整 (操作性向上)
-document.addEventListener('keydown', (e) => {
-    if (e.key === ' ' && currentPhase !== 'answer') {
-        e.preventDefault();
+    if (currentIndex < QUESTIONS.length - 1) {
+        animateTransition(() => {
+            currentIndex++;
+            currentPhase = 'question';
+        });
+    } else {
+        showEnding();
     }
-    
-    const key = e.key.toLowerCase();
+}
 
+function previousQuestion() {
+    if (isAnimating || currentIndex === 0) return;
+    playClickSound(); 
+    
+    animateTransition(() => {
+        currentIndex--;
+        currentPhase = 'question';
+    });
+}
+
+
+// ----------------------------------------------------
+// キーボードイベント 
+// ----------------------------------------------------
+document.addEventListener('keydown', (e) => {
+    const key = e.key.toLowerCase();
+    
     if (currentPhase === 'opening') {
-        if (key === '1') { startQuiz(true); }
-        if (key === '2') { startQuiz(false); }
+        if (key === 'enter') {
+            e.preventDefault(); 
+            startQuiz(quizMode); // 現在選択中のモードで開始
+        }
         return;
     }
 
     if (currentPhase === 'ending') {
-        if (key === 'enter' || key === ' ') { retryQuiz(); }
+        if (key === 'enter') {
+            e.preventDefault(); 
+            if (quizMode) {
+                showResultList();
+            } else {
+                retryQuiz();
+            }
+        }
+        if (key === 'r') retryQuiz();
+        return;
+    }
+    
+    if (currentPhase === 'results') {
+        if (key === 'enter') showEnding();
+        if (key === 'r') retryQuiz();
         return;
     }
 
     if (currentPhase === 'question') {
         if (quizMode) {
-            // クイズモード: O/X または M/B、Enter/Spaceで「○」回答
-            if (key === 'o' || key === 'm' || key === ' ' || key === 'enter') { 
+            if (key === 'o' || key === 'enter') {
                 e.preventDefault(); 
-                submitAnswer(true); 
+                submitAnswer(true);
             }
-            if (key === 'x' || key === 'b') { 
-                submitAnswer(false); 
+            if (key === 'x' || key === ' ') {
+                e.preventDefault(); 
+                submitAnswer(false);
             }
         } else {
-            // 学習モード: Enter/Space/右矢印で答えを見る
-            if (key === 'enter' || key === ' ' || key === 'arrowright') { 
-                e.preventDefault();
-                showAnswer(); 
-            }
+            if (key === 'enter' || key === 'arrowright') showAnswer();
+            if (key === 'arrowleft' && currentIndex > 0) previousQuestion();
         }
-    } else if (currentPhase === 'answer') {
-        // 解答ページ: 左で戻る、右/Enter/Spaceで次へ
-        if (key === 'arrowleft') { backToQuestion(); }
-        else if (key === 'arrowright' || key === 'enter' || key === ' ') {
-            e.preventDefault();
+        return;
+    }
+
+    if (currentPhase === 'answer') {
+        if (key === 'enter' || key === ' ' || key === 'arrowright') {
             if (currentIndex < QUESTIONS.length - 1) {
                 nextQuestion();
             } else {
                 showEnding();
             }
         }
-    }
-    
-    if (key === 'arrowleft' && currentIndex > 0) {
-        if (currentPhase === 'question') {
-            previousQuestion();
-        } 
+        if (key === 'arrowleft') backToQuestion(); 
+        return;
     }
 });
-
-// 初期レンダリング
-render();
