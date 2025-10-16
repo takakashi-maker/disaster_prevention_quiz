@@ -42,7 +42,7 @@ function toggleMode() {
     playClickSound();
     quizMode = !quizMode;
     localStorage.setItem('quizMode', quizMode); // LocalStorageに保存
-    // オープニング画面なら何もしない
+    // オープニング画面なら画面を再描画
     if (currentPhase === 'opening') {
         render();
         return;
@@ -91,7 +91,7 @@ function playClickSound() {
 }
 
 // ----------------------------------------------------
-// UI/アニメーション (変更なし)
+// UI/アニメーション
 // ----------------------------------------------------
 function updateProgress() {
     const progress = document.getElementById('progress-bar');
@@ -134,6 +134,62 @@ function animateTransition(callback) {
 }
 
 // ----------------------------------------------------
+// キーボードヘルプ/トースト機能 (今回追加)
+// ----------------------------------------------------
+let toastTimeout;
+
+// トーストを表示する関数
+function showKeyboardHelp() {
+    playClickSound();
+
+    const container = document.getElementById('toast-container');
+    // すでにトーストが表示されていたら非表示にする
+    if (container.querySelector('.toast')) {
+        hideKeyboardHelp();
+        return;
+    }
+    
+    // モードに応じてメッセージを生成
+    let message;
+    if (quizMode) {
+        message = "【クイズ】 O または Enter: 正解, X または Space: 不正解";
+    } else {
+        message = "【学習】 Enter / →: 答えを見る / 次へ, ←: 前へ";
+    }
+
+    const toastHTML = `<div class="toast">${message}</div>`;
+    container.innerHTML = toastHTML;
+    const toast = container.querySelector('.toast');
+
+    // 表示アニメーション
+    setTimeout(() => {
+        toast.classList.add('show');
+        
+        // 3秒後に非表示タイマーをセット
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(hideKeyboardHelp, 3000);
+    }, 10);
+}
+
+// トーストを非表示にする関数
+function hideKeyboardHelp() {
+    const container = document.getElementById('toast-container');
+    const toast = container ? container.querySelector('.toast') : null;
+    
+    if (toast) {
+        toast.classList.remove('show');
+        clearTimeout(toastTimeout);
+
+        // アニメーション後にDOMから削除
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.remove();
+            }
+        }, 300);
+    }
+}
+
+// ----------------------------------------------------
 // ヘッダーレンダリング関数 
 // ----------------------------------------------------
 function renderHeader() {
@@ -147,11 +203,9 @@ function renderHeader() {
     if (currentPhase === 'question' || currentPhase === 'answer') {
         const scoreHtml = quizMode ? `<span class="score-display">正解: ${score}</span>` : '';
         
-        // ★修正済み: アイコン(←)とテキスト(前の問題)をspan.iconとspan.textで分ける
         const prevBtn = `<button class="btn btn-sm btn-back" onclick="previousQuestion()" ${currentIndex === 0 ? 'disabled' : ''}>
             <span class="icon">←</span> <span class="text">前の問題</span>
         </button>`;
-        // ★修正済み: アイコン(→)とテキスト(次の問題)をspan.iconとspan.textで分ける
         const nextBtn = `<button class="btn btn-sm btn-back" onclick="nextQuestion()" ${currentIndex === QUESTIONS.length - 1 ? 'disabled' : ''}>
             <span class="text">次の問題</span> <span class="icon">→</span>
         </button>`;
@@ -175,7 +229,6 @@ function renderHeader() {
     const soundIcon = isSoundOn ? '🔊' : '🔇';
     const soundText = isSoundOn ? 'サウンドOFF' : 'サウンドON'; // サウンドON/OFFテキスト
 
-    // ★修正済み: アイコンとテキストをspan.iconとspan.textで分ける
     controlContent += `
         <button class="btn btn-sm btn-mode-toggle" onclick="toggleMode()" title="${modeDisplay}を切り替え">
             <span class="icon" style="font-size: 1.2rem;">🔄</span>
@@ -237,18 +290,22 @@ function renderContent() {
   const endingImage = `images/${themePrefix}ending.webp`; 
 
   if (currentPhase === 'opening') {
-    // オープニング (シンプル化)
+    // オープニング
     const modeDisplay = quizMode ? 'クイズモード' : '学習モード';
+    
+    // ★★★ 変更点: ボタンのラベルにモード名とキー操作 を含める ★★★
+    const startButtonLabel = `🎮 ${modeDisplay}で開始する 🎮`;
+    
     mainHtml += `
       <div class="opening-screen">
         <div class="image-container image-container-large" style="animation: none;">
             <img src="${openingImage}" onerror="this.onerror=null;this.src='images/opening.webp';" alt="オープニング画像" class="quiz-image">
         </div>
         <div class="opening-title">防災○×クイズ</div>
-        <div class="opening-subtitle">全${QUESTIONS.length}問で防災の知識をチェック！<br>現在のモード：${modeDisplay}</div>
+        <div class="opening-subtitle">全${QUESTIONS.length}問で防災の知識をチェック！</div>
         
         <div class="button-group button-group-large">
-            <button class="btn btn-start btn-large" onclick="startQuiz(quizMode)">🎮 開始する (Enter) 🎮</button>
+            <button class="btn btn-start btn-large" onclick="startQuiz(quizMode)">${startButtonLabel}</button>
         </div>
       </div>
     `;
@@ -271,7 +328,7 @@ function renderContent() {
         </div>
       </div>
       <div class="button-group button-group-ending">
-        ${quizMode ? `<button class="btn btn-next" onclick="showResultList()">結果を一覧で見る (Enter) →</button>` : ''}
+        ${quizMode ? `<button class="btn btn-next" onclick="showResultList()">結果を一覧で見る →</button>` : ''}
       </div>
     `;
     
@@ -337,12 +394,12 @@ function renderContent() {
         <img src="${q.image}" alt="問題${currentIndex + 1}の画像" class="quiz-image">
       </div>
       <div class="question-text">${q.q}</div>
-      <div class="prompt-text">${quizMode ? '答えを選んでください (O/X/Enter/Spaceキー)' : '○ か × か (下のボタンか Enter/→キーで答えを見る)'}</div>
+      <div class="prompt-text">${quizMode ? '答えを選んでください' : '○ か × か'}</div>
       
       <div class="button-group">
         ${quizMode ? `
-            <button class="btn btn-answer-ox btn-answer-o" onclick="submitAnswer(true)">○ (O/Enter)</button>
-            <button class="btn btn-answer-ox btn-answer-x" onclick="submitAnswer(false)">× (X/Space)</button>
+            <button class="btn btn-answer-ox btn-answer-o" onclick="submitAnswer(true)">○ (正解)</button>
+            <button class="btn btn-answer-ox btn-answer-x" onclick="submitAnswer(false)">× (不正解)</button>
         ` : `
             <button class="btn btn-learn" onclick="showAnswer()">答えを見る ✨</button>
         `}
@@ -368,7 +425,7 @@ function renderContent() {
       
       <div class="button-group button-group-ending">
         <button class="btn btn-back" onclick="backToQuestion()">← 問題に戻る</button>
-        ${showNext ? '<button class="btn btn-next" onclick="nextQuestion()">→ 次の問題 (Enter)</button>' : '<button class="btn btn-next" onclick="showEnding()">🎉 終了画面へ (Enter)</button>'}
+        ${showNext ? '<button class="btn btn-next" onclick="nextQuestion()">→ 次の問題 </button>' : '<button class="btn btn-next" onclick="showEnding()">🎉 終了画面へ </button>'}
       </div>
     `;
   }
@@ -494,6 +551,29 @@ function previousQuestion() {
 document.addEventListener('keydown', (e) => {
     const key = e.key.toLowerCase();
     
+    // '?'キーでヘルプを表示するロジック
+    if (key === '?') {
+        e.preventDefault();
+        showKeyboardHelp();
+        return;
+    }
+    
+    // ---------------------------------------
+    // 以下、キーボードヘルプ非表示処理の呼び出し
+    // ---------------------------------------
+    // Escキーが押されたらトーストを非表示にする
+    if (e.key === 'Escape') {
+        hideKeyboardHelp();
+        isAnimating = false;
+        return;
+    }
+    
+    // その他の有効なキーが押されたらトーストを非表示にする
+    if (['enter', 'o', 'x', ' '].includes(key) || key.includes('arrow')) {
+        hideKeyboardHelp();
+    }
+
+
     if (currentPhase === 'opening') {
         if (key === 'enter') {
             e.preventDefault(); 
