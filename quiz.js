@@ -15,11 +15,16 @@ const THEMES = ['default', 'autumn', 'halloween'];
 let currentTheme = localStorage.getItem('quizTheme') || THEMES[0];
 let currentThemeIndex = THEMES.indexOf(currentTheme); 
 
+// 国旗の定義 (テーマの順番と合わせる)
+const FLAGS = ['🇯🇵', '🇺🇸', '🇫🇷'];
+let currentFlagIndex = JSON.parse(localStorage.getItem('currentFlagIndex')) || 0;
+
 // 初期化時にテーマを適用
 document.addEventListener('DOMContentLoaded', () => {
     applyTheme(currentTheme);
     document.title = MESSAGES.appTitle; // ★タイトル設定を追加
     render(); 
+    updateFlag(currentThemeIndex);
 });
 
 // テーマ適用関数
@@ -30,12 +35,37 @@ function applyTheme(theme) {
     currentThemeIndex = THEMES.indexOf(currentTheme);
 }
 
+// 国旗のみを切り替える関数（右下のボタン用）
+function cycleLanguage() {
+    playClickSound(); 
+    
+    // インデックスを循環させる (0 -> 1 -> 2 -> 0...)
+    currentFlagIndex = (currentFlagIndex + 1) % FLAGS.length;
+    
+    // LocalStorageに保存
+    localStorage.setItem('currentFlagIndex', currentFlagIndex);
+    
+    // 国旗アイコンを更新
+    updateFlag(currentFlagIndex);
+    
+    // render()の再実行は不要。ヘッダー表示を更新する必要がないため。
+}
+
+
+// 国旗を更新するヘルパー関数
+function updateFlag(index) {
+    const flagElement = document.getElementById('current-flag');
+    if (flagElement) {
+        flagElement.textContent = FLAGS[index];
+    }
+}
+
 // テーマ変更関数
 function changeTheme() {
     playClickSound(); 
     currentThemeIndex = (currentThemeIndex + 1) % THEMES.length;
     applyTheme(THEMES[currentThemeIndex]);
-    render(); 
+    render();
 }
 
 // モード切り替え関数
