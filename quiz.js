@@ -15,16 +15,19 @@ const THEMES = ['default', 'autumn', 'halloween'];
 let currentTheme = localStorage.getItem('quizTheme') || THEMES[0];
 let currentThemeIndex = THEMES.indexOf(currentTheme); 
 
-// 国旗の定義 (テーマの順番と合わせる)
-const FLAGS = ['🇯🇵', '🇺🇸', '🇫🇷'];
-let currentFlagIndex = JSON.parse(localStorage.getItem('currentFlagIndex')) || 0;
+// 🌍 言語管理のための追加
+const FLAGS = ['🇯🇵', '🇺🇸', '🇫🇷']; // 国旗の定義
+const LANGUAGES = ['ja', 'en', 'fr']; // 言語キーを定義
+let currentFlagIndex = JSON.parse(localStorage.getItem('currentFlagIndex')) || 0; 
+let currentLanguage = LANGUAGES[currentFlagIndex]; // 現在の言語キー
 
-// 初期化時にテーマを適用
+// 初期化時にテーマと言語を適用
 document.addEventListener('DOMContentLoaded', () => {
     applyTheme(currentTheme);
-    document.title = MESSAGES.appTitle; // ★タイトル設定を追加
+    setLanguage(currentLanguage); // ★ 追加: 言語をセット
+    document.title = MESSAGES.appTitle; // ★ 修正: タイトル設定
     render(); 
-    updateFlag(currentThemeIndex);
+    updateFlag(currentFlagIndex); // ★ 修正: インデックスを渡す
 });
 
 // テーマ適用関数
@@ -35,22 +38,41 @@ function applyTheme(theme) {
     currentThemeIndex = THEMES.indexOf(currentTheme);
 }
 
-// 国旗のみを切り替える関数（右下のボタン用）
+// ----------------------------------------------------
+// 🌍 言語管理のための追加関数
+// ----------------------------------------------------
+
+// 言語設定関数
+function setLanguage(langKey) {
+    // messages.js と questions.js で定義されたグローバル変数を使用
+    if (typeof MESSAGES_ALL_LANG !== 'undefined' && MESSAGES_ALL_LANG[langKey]) {
+        MESSAGES = MESSAGES_ALL_LANG[langKey];
+    }
+    if (typeof QUESTIONS_ALL_LANG !== 'undefined' && QUESTIONS_ALL_LANG[langKey]) {
+        QUESTIONS = QUESTIONS_ALL_LANG[langKey];
+    }
+    currentLanguage = langKey;
+}
+
+// 言語を循環的に切り替える関数（右下のボタン用）
 function cycleLanguage() {
     playClickSound(); 
     
     // インデックスを循環させる (0 -> 1 -> 2 -> 0...)
     currentFlagIndex = (currentFlagIndex + 1) % FLAGS.length;
+    currentLanguage = LANGUAGES[currentFlagIndex];
     
     // LocalStorageに保存
     localStorage.setItem('currentFlagIndex', currentFlagIndex);
     
+    // 言語をセットし、画面を再描画
+    setLanguage(currentLanguage);
+    document.title = MESSAGES.appTitle; // タイトルも更新
+    render();
+    
     // 国旗アイコンを更新
     updateFlag(currentFlagIndex);
-    
-    // render()の再実行は不要。ヘッダー表示を更新する必要がないため。
 }
-
 
 // 国旗を更新するヘルパー関数
 function updateFlag(index) {
@@ -59,6 +81,10 @@ function updateFlag(index) {
         flagElement.textContent = FLAGS[index];
     }
 }
+
+// ----------------------------------------------------
+// その他の関数 (変更なし)
+// ----------------------------------------------------
 
 // テーマ変更関数
 function changeTheme() {
@@ -94,7 +120,7 @@ function toggleSound() {
 
 
 // ----------------------------------------------------
-// 音声管理 (効果音オン/オフ機能を追加)
+// 音声管理
 // ----------------------------------------------------
 function playCorrectSound() {
     if (!isSoundOn) return;
@@ -165,7 +191,7 @@ function animateTransition(callback) {
 }
 
 // ----------------------------------------------------
-// キーボードヘルプ/トースト機能 (文言をMESSAGESから取得)
+// キーボードヘルプ/トースト機能
 // ----------------------------------------------------
 let toastTimeout;
 
@@ -221,7 +247,7 @@ function hideKeyboardHelp() {
 }
 
 // ----------------------------------------------------
-// ヘッダーレンダリング関数 (文言をMESSAGESから取得)
+// ヘッダーレンダリング関数
 // ----------------------------------------------------
 function renderHeader() {
     const headerBar = document.getElementById('header-bar');
@@ -255,7 +281,7 @@ function renderHeader() {
         statusContent = `<span class="mode-display" style="font-weight: 900; font-size: 1.3rem;">${titleText}</span>`; 
     }
     
-    // 右側: コントロールエリア (文言をMESSAGESから取得)
+    // 右側: コントロールエリア 
     const currentThemeDisplay = currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1);
     const modeDisplay = quizMode ? MESSAGES.headerModeQuiz : MESSAGES.headerModeLearn;
     const nextModeDisplay = quizMode ? MESSAGES.nextModeLearn : MESSAGES.nextModeQuiz; // 遷移先のモード名
@@ -299,17 +325,17 @@ function render() {
   updateProgress();
 }
 
-// renderContent (文言をMESSAGESから取得)
+// renderContent
 function renderContent() {
   const contentArea = document.getElementById('content-area');
   if (!contentArea) return; 
 
-  // QUESTIONSが定義されていない場合の安全装置 (文言をMESSAGESから取得)
+  // QUESTIONSが定義されていない場合の安全装置 
   if (typeof QUESTIONS === 'undefined' || QUESTIONS.length === 0) {
       contentArea.innerHTML = `
         <div class="opening-screen" style="justify-content: flex-start; padding-top: 100px;">
-          <div class="opening-title" style="color: #dc3545;">🚨 ${MESSAGES.errorTitle} 🚨</div>
-          <div class="opening-subtitle" style="font-size: 1.3rem;">${MESSAGES.errorMessage}</div>
+          <div class="opening-title" style="color: #dc3545;">🚨 ${MESSAGES.errorTitle || 'ERROR'} 🚨</div>
+          <div class="opening-subtitle" style="font-size: 1.3rem;">${MESSAGES.errorMessage || 'Questions are not defined for this language.'}</div>
         </div>
       `;
       return;
@@ -327,7 +353,7 @@ function renderContent() {
     // オープニング
     const modeDisplay = quizMode ? MESSAGES.headerModeQuiz : MESSAGES.headerModeLearn;
     
-    // ★★★ 変更点: ボタンのラベルにモード名を含める (MESSAGESを使用) ★★★
+    // ボタンのラベルにモード名を含める
     const startButtonLabel = MESSAGES.startQuizButton.replace('{MODE}', modeDisplay);
     const subtitle = MESSAGES.openingSubtitle.replace('{QUESTIONS_LENGTH}', QUESTIONS.length);
 
@@ -368,13 +394,13 @@ function renderContent() {
     `;
     
   } else if (currentPhase === 'results') {
-    // 結果一覧ページ (文言をMESSAGESから取得)
+    // 結果一覧ページ 
     let resultListHtml = QUESTIONS.map((item, index) => {
         const questionNum = index + 1;
         const correctSymbol = item.answer ? '○' : '×';
         
         let userResult, resultClass;
-        if (!item.userAnswer) {
+        if (item.userAnswer === null || typeof item.userAnswer === 'undefined') {
             userResult = MESSAGES.resultsUnanswered;
             resultClass = 'result-unanswered';
         } else {
@@ -425,7 +451,7 @@ function renderContent() {
     `;
 
   } else if (currentPhase === 'question') {
-    // 問題表示 (文言をMESSAGESから取得)
+    // 問題表示 
     const promptText = quizMode ? MESSAGES.promptText : MESSAGES.promptTextLearn;
 
     mainHtml += `
@@ -450,7 +476,7 @@ function renderContent() {
     }, 10);
 
   } else { // currentPhase === 'answer'
-    // 解答表示 (文言をMESSAGESから取得)
+    // 解答表示 
     const symbolClass = q.answer ? 'answer-correct' : 'answer-wrong';
     const symbol = q.answer ? '○' : '×';
     const showNext = currentIndex < QUESTIONS.length - 1;
