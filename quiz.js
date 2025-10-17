@@ -18,6 +18,7 @@ let currentThemeIndex = THEMES.indexOf(currentTheme);
 // 初期化時にテーマを適用
 document.addEventListener('DOMContentLoaded', () => {
     applyTheme(currentTheme);
+    document.title = MESSAGES.appTitle; // ★タイトル設定を追加
     render(); 
 });
 
@@ -134,7 +135,7 @@ function animateTransition(callback) {
 }
 
 // ----------------------------------------------------
-// キーボードヘルプ/トースト機能 (今回追加)
+// キーボードヘルプ/トースト機能 (文言をMESSAGESから取得)
 // ----------------------------------------------------
 let toastTimeout;
 
@@ -152,9 +153,9 @@ function showKeyboardHelp() {
     // モードに応じてメッセージを生成
     let message;
     if (quizMode) {
-        message = "【クイズ】 O または Enter: 正解, X または Space: 不正解";
+        message = MESSAGES.toastQuizMessage; 
     } else {
-        message = "【学習】 Enter / →: 答えを見る / 次へ, ←: 前へ";
+        message = MESSAGES.toastLearnMessage; 
     }
 
     const toastHTML = `<div class="toast">${message}</div>`;
@@ -190,7 +191,7 @@ function hideKeyboardHelp() {
 }
 
 // ----------------------------------------------------
-// ヘッダーレンダリング関数 
+// ヘッダーレンダリング関数 (文言をMESSAGESから取得)
 // ----------------------------------------------------
 function renderHeader() {
     const headerBar = document.getElementById('header-bar');
@@ -201,50 +202,52 @@ function renderHeader() {
 
     // 左側: ステータス/モード表示
     if (currentPhase === 'question' || currentPhase === 'answer') {
-        const scoreHtml = quizMode ? `<span class="score-display">正解: ${score}</span>` : '';
+        const scoreHtml = quizMode ? `<span class="score-display">${MESSAGES.headerScore}${score}</span>` : ''; 
         
         const prevBtn = `<button class="btn btn-sm btn-back" onclick="previousQuestion()" ${currentIndex === 0 ? 'disabled' : ''}>
-            <span class="icon">←</span> <span class="text">前の問題</span>
-        </button>`;
+            <span class="icon">←</span> <span class="text">${MESSAGES.prevQuestion}</span>
+        </button>`; 
         const nextBtn = `<button class="btn btn-sm btn-back" onclick="nextQuestion()" ${currentIndex === QUESTIONS.length - 1 ? 'disabled' : ''}>
-            <span class="text">次の問題</span> <span class="icon">→</span>
-        </button>`;
+            <span class="text">${MESSAGES.nextQuestion}</span> <span class="icon">→</span>
+        </button>`; 
 
         statusContent = `
             ${prevBtn}
-            <span class="question-count">${currentIndex + 1} / ${QUESTIONS.length} 問目</span>
+            <span class="question-count">${currentIndex + 1} / ${QUESTIONS.length}${MESSAGES.questionUnit}</span> 
             ${scoreHtml}
             ${nextBtn}
         `;
         
     } else {
         // オープニング/エンディング/結果一覧
-        statusContent = `<span class="mode-display" style="font-weight: 900; font-size: 1.3rem;">防災○×クイズ</span>`;
+        
+        const titleText = currentPhase === 'results' ? MESSAGES.headerModeQuiz : MESSAGES.headerTitle;
+        statusContent = `<span class="mode-display" style="font-weight: 900; font-size: 1.3rem;">${titleText}</span>`; 
     }
     
-    // 右側: コントロールエリア 
+    // 右側: コントロールエリア (文言をMESSAGESから取得)
     const currentThemeDisplay = currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1);
-    const modeDisplay = quizMode ? 'クイズモード' : '学習モード';
-    const nextModeDisplay = quizMode ? '学習モードへ' : 'クイズモードへ'; // 遷移先のモード名
+    const modeDisplay = quizMode ? MESSAGES.headerModeQuiz : MESSAGES.headerModeLearn;
+    const nextModeDisplay = quizMode ? MESSAGES.nextModeLearn : MESSAGES.nextModeQuiz; // 遷移先のモード名
     const soundIcon = isSoundOn ? '🔊' : '🔇';
-    const soundText = isSoundOn ? 'サウンドOFF' : 'サウンドON'; // サウンドON/OFFテキスト
+    const soundText = isSoundOn ? MESSAGES.soundTextOn : MESSAGES.soundTextOff; // サウンドON/OFFテキスト
 
     controlContent += `
         <button class="btn btn-sm btn-mode-toggle" onclick="toggleMode()" title="${modeDisplay}を切り替え">
             <span class="icon" style="font-size: 1.2rem;">🔄</span>
             <span class="text">${nextModeDisplay}</span>
         </button>
-        <button class="btn btn-sm btn-sound-toggle" onclick="toggleSound()" title="効果音オン/オフ">
+        <button class="btn btn-sm btn-sound-toggle" onclick="toggleSound()" title="${soundText}">
             <span class="icon" style="font-size: 1.2rem;">${soundIcon}</span> 
             <span class="text">${soundText}</span>
         </button>
-        <button class="btn btn-sm btn-back" onclick="changeTheme()" title="テーマ変更">
+        <button class="btn btn-sm btn-back" onclick="changeTheme()" title="${MESSAGES.themeChange}">
             <span class="icon" style="font-size: 1.2rem;">🎨</span> 
             <span class="text">${currentThemeDisplay}</span>
         </button>
-        <button class="btn btn-sm btn-back" onclick="retryQuiz()" title="最初に戻る">
+        <button class="btn btn-sm btn-back" onclick="retryQuiz()" title="${MESSAGES.reset}">
             <span class="icon" style="font-size: 1.2rem;">🏠</span> 
-            <span class="text">リセット</span>
+            <span class="text">${MESSAGES.reset}</span>
         </button>
     `;
 
@@ -266,16 +269,17 @@ function render() {
   updateProgress();
 }
 
+// renderContent (文言をMESSAGESから取得)
 function renderContent() {
   const contentArea = document.getElementById('content-area');
   if (!contentArea) return; 
 
-  // QUESTIONSが定義されていない場合の安全装置
+  // QUESTIONSが定義されていない場合の安全装置 (文言をMESSAGESから取得)
   if (typeof QUESTIONS === 'undefined' || QUESTIONS.length === 0) {
       contentArea.innerHTML = `
         <div class="opening-screen" style="justify-content: flex-start; padding-top: 100px;">
-          <div class="opening-title" style="color: #dc3545;">🚨 エラー 🚨</div>
-          <div class="opening-subtitle" style="font-size: 1.3rem;">問題データ(questions.js)が読み込めていないか、<br>またはQUESTIONS配列が空です。<br>ファイルパスと読み込み順を確認してください。</div>
+          <div class="opening-title" style="color: #dc3545;">🚨 ${MESSAGES.errorTitle} 🚨</div>
+          <div class="opening-subtitle" style="font-size: 1.3rem;">${MESSAGES.errorMessage}</div>
         </div>
       `;
       return;
@@ -291,18 +295,19 @@ function renderContent() {
 
   if (currentPhase === 'opening') {
     // オープニング
-    const modeDisplay = quizMode ? 'クイズモード' : '学習モード';
+    const modeDisplay = quizMode ? MESSAGES.headerModeQuiz : MESSAGES.headerModeLearn;
     
-    // ★★★ 変更点: ボタンのラベルにモード名とキー操作 を含める ★★★
-    const startButtonLabel = `🎮 ${modeDisplay}で開始する 🎮`;
-    
+    // ★★★ 変更点: ボタンのラベルにモード名を含める (MESSAGESを使用) ★★★
+    const startButtonLabel = MESSAGES.startQuizButton.replace('{MODE}', modeDisplay);
+    const subtitle = MESSAGES.openingSubtitle.replace('{QUESTIONS_LENGTH}', QUESTIONS.length);
+
     mainHtml += `
       <div class="opening-screen">
         <div class="image-container image-container-large" style="animation: none;">
-            <img src="${openingImage}" onerror="this.onerror=null;this.src='images/opening.webp';" alt="オープニング画像" class="quiz-image">
+            <img src="${openingImage}" onerror="this.onerror=null;this.src='images/opening.webp';" alt="${MESSAGES.imageAlt}" class="quiz-image">
         </div>
-        <div class="opening-title">防災○×クイズ</div>
-        <div class="opening-subtitle">全${QUESTIONS.length}問で防災の知識をチェック！</div>
+        <div class="opening-title">${MESSAGES.openingTitle}</div>
+        <div class="opening-subtitle">${subtitle}</div>
         
         <div class="button-group button-group-large">
             <button class="btn btn-start btn-large" onclick="startQuiz(quizMode)">${startButtonLabel}</button>
@@ -312,40 +317,40 @@ function renderContent() {
     
   } else if (currentPhase === 'ending') {
     // 終了画面
-    const scoreMessage = quizMode ? `<div class="score-display ending-score-display">${score} / ${QUESTIONS.length} 問 正解！</div>` : '';
-    const endingTitle = quizMode ? `🎉 クイズ終了！おつかれさまでした！ 🎉` : `学習終了！おつかれさまでした！`;
+    const scoreMessage = quizMode ? `<div class="score-display ending-score-display">${MESSAGES.endingScoreMessage.replace('{SCORE}', score).replace('{TOTAL}', QUESTIONS.length)}</div>` : '';
+    const endingTitle = quizMode ? MESSAGES.endingTitleQuiz : MESSAGES.endingTitleLearn;
     
     mainHtml += `
       <div class="ending-screen">
         <div class="image-container image-container-large" style="animation: none;">
-            <img src="${endingImage}" onerror="this.onerror=null;this.src='images/ending.webp';" alt="エンディング画像" class="quiz-image">
+            <img src="${endingImage}" onerror="this.onerror=null;this.src='images/ending.webp';" alt="${MESSAGES.imageAlt}" class="quiz-image">
         </div>
         <div class="ending-title">${endingTitle}</div>
         ${scoreMessage}
         <div class="ending-message">
-          防災の知識は身についたかな？<br>
-          今日学んだことを忘れず、災害に備えましょう！
+          ${MESSAGES.endingMessageLine1}<br>
+          ${MESSAGES.endingMessageLine2}
         </div>
       </div>
       <div class="button-group button-group-ending">
-        ${quizMode ? `<button class="btn btn-next" onclick="showResultList()">結果を一覧で見る →</button>` : ''}
+        ${quizMode ? `<button class="btn btn-next" onclick="showResultList()">${MESSAGES.endingButtonShowResults}</button>` : ''}
       </div>
     `;
     
   } else if (currentPhase === 'results') {
-    // 結果一覧ページ 
+    // 結果一覧ページ (文言をMESSAGESから取得)
     let resultListHtml = QUESTIONS.map((item, index) => {
         const questionNum = index + 1;
         const correctSymbol = item.answer ? '○' : '×';
         
         let userResult, resultClass;
         if (!item.userAnswer) {
-            userResult = '未回答';
+            userResult = MESSAGES.resultsUnanswered;
             resultClass = 'result-unanswered';
         } else {
             const userSymbol = item.userAnswer === true ? '○' : '×';
             resultClass = item.userCorrect ? 'result-correct' : 'result-wrong';
-            userResult = `${userSymbol} (${item.userCorrect ? '正解' : '不正解'})`;
+            userResult = `${userSymbol} (${item.userCorrect ? MESSAGES.resultsCorrectText : MESSAGES.resultsWrongText})`;
         }
 
         return `
@@ -359,20 +364,22 @@ function renderContent() {
         `;
     }).join('');
 
+    const resultsSummary = MESSAGES.resultsSummary.replace('{TOTAL}', QUESTIONS.length).replace('{SCORE}', score);
+
     mainHtml += `
       <div class="result-list-screen">
-        <div class="ending-title">クイズ結果一覧</div>
+        <div class="ending-title">${MESSAGES.resultsTitle}</div>
         <div class="ending-message" style="margin-bottom: 2rem;">
-            全${QUESTIONS.length}問中、**${score}問** 正解しました！
+            ${resultsSummary}
         </div>
         <div class="result-table-container">
             <table class="result-table">
                 <thead>
                     <tr>
-                        <th>No.</th>
-                        <th>問題文</th>
-                        <th class="correct-col">正答</th>
-                        <th class="user-col">あなたの回答</th>
+                        <th>${MESSAGES.resultsTableNo}</th>
+                        <th>${MESSAGES.resultsTableQuestion}</th>
+                        <th class="correct-col">${MESSAGES.resultsTableCorrect}</th>
+                        <th class="user-col">${MESSAGES.resultsTableUser}</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -383,25 +390,27 @@ function renderContent() {
         </div>
       </div>
       <div class="button-group button-group-ending">
-        <button class="btn btn-back" onclick="showEnding()">← 終了画面に戻る</button>
+        <button class="btn btn-back" onclick="showEnding()">${MESSAGES.resultsBackToEnding}</button>
       </div>
     `;
 
   } else if (currentPhase === 'question') {
-    // 問題表示
+    // 問題表示 (文言をMESSAGESから取得)
+    const promptText = quizMode ? MESSAGES.promptText : MESSAGES.promptTextLearn;
+
     mainHtml += `
       <div class="image-container" id="current-image-container">
-        <img src="${q.image}" alt="問題${currentIndex + 1}の画像" class="quiz-image">
+        <img src="${q.image}" alt="${MESSAGES.imageAlt}" class="quiz-image">
       </div>
       <div class="question-text">${q.q}</div>
-      <div class="prompt-text">${quizMode ? '答えを選んでください' : '○ か × か'}</div>
+      <div class="prompt-text">${promptText}</div>
       
       <div class="button-group">
         ${quizMode ? `
-            <button class="btn btn-answer-ox btn-answer-o" onclick="submitAnswer(true)">○ (正解)</button>
-            <button class="btn btn-answer-ox btn-answer-x" onclick="submitAnswer(false)">× (不正解)</button>
+            <button class="btn btn-answer-ox btn-answer-o" onclick="submitAnswer(true)">○ (${MESSAGES.resultsCorrectText})</button>
+            <button class="btn btn-answer-ox btn-answer-x" onclick="submitAnswer(false)">× (${MESSAGES.resultsWrongText})</button>
         ` : `
-            <button class="btn btn-learn" onclick="showAnswer()">答えを見る ✨</button>
+            <button class="btn btn-learn" onclick="showAnswer()">${MESSAGES.showAnswerButton}</button>
         `}
       </div>
     `;
@@ -411,7 +420,7 @@ function renderContent() {
     }, 10);
 
   } else { // currentPhase === 'answer'
-    // 解答表示
+    // 解答表示 (文言をMESSAGESから取得)
     const symbolClass = q.answer ? 'answer-correct' : 'answer-wrong';
     const symbol = q.answer ? '○' : '×';
     const showNext = currentIndex < QUESTIONS.length - 1;
@@ -424,8 +433,8 @@ function renderContent() {
       <div class="reason-text">${q.reason}</div>
       
       <div class="button-group button-group-ending">
-        <button class="btn btn-back" onclick="backToQuestion()">← 問題に戻る</button>
-        ${showNext ? '<button class="btn btn-next" onclick="nextQuestion()">→ 次の問題 </button>' : '<button class="btn btn-next" onclick="showEnding()">🎉 終了画面へ </button>'}
+        <button class="btn btn-back" onclick="backToQuestion()">← ${MESSAGES.answerToQuestion}</button>
+        ${showNext ? `<button class="btn btn-next" onclick="nextQuestion()">${MESSAGES.nextQuestionButton}</button>` : `<button class="btn btn-next" onclick="showEnding()">${MESSAGES.endingButton}</button>`}
       </div>
     `;
   }
@@ -437,7 +446,7 @@ function renderContent() {
 
 
 // ----------------------------------------------------
-// イベントハンドラー 
+// イベントハンドラー (変更なし)
 // ----------------------------------------------------
 
 function startQuiz(mode, isReStart = false) {
@@ -546,7 +555,7 @@ function previousQuestion() {
 
 
 // ----------------------------------------------------
-// キーボードイベント 
+// キーボードイベント (変更なし)
 // ----------------------------------------------------
 document.addEventListener('keydown', (e) => {
     const key = e.key.toLowerCase();
